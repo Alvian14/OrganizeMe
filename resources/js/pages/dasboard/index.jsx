@@ -46,7 +46,7 @@ const TaskDashboard = () => {
             <h5 className="text-danger mb-4">Task Status</h5>
             <div className="d-flex justify-content-around">
               <div>
-                <h4>46</h4>
+                <h4>40</h4>
                 <p>Completed</p>
               </div>
               <div>
