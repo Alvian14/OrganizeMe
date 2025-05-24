@@ -1,22 +1,31 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Login from '../pages/auth/login/form_login';
 import Home from '../pages';
 import Register from "../pages/auth/register/form_register";
-import TaskDashboard from "../pages/dasboard";
+
+import DashboardLayout from './layouts/DashboardLayout';
+import TaskDashboard from "../pages/dasboard/TaskDashboard";
 import MyTask from "../pages/mytask";
+import TaskCategories from "../pages/dasboard/taskcategories/TaskCategories";
 
 export default function App() {
-    return (
-        <div className="container">
-            <BrowserRouter>
-                <Routes>
-                    <Route index path="/" element={<Login/>} />
-                    <Route path='/home' element={<Home/>} />
-                    <Route path="/register" element={<Register/>} />
-                    <Route path="/dashboard" element={<TaskDashboard />} />
-                    <Route path="/mytask" element={<MyTask />} />
-                </Routes>  
-            </BrowserRouter>
-        </div>
-    );
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected Dashboard routes with layout */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<TaskDashboard />} />
+          <Route path="/mytask" element={<MyTask />} />
+          <Route path="/dashboard/task-categories" element={<TaskCategories />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }

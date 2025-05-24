@@ -1,26 +1,11 @@
 import React from "react";
 import { Card, Button, Form } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const MyTaskPage = () => {
   return (
     <div className="d-flex">
-      {/* Sidebar */}
-      <div className="bg-secondary text-white p-4" style={{ width: "250px", minHeight: "100vh" }}>
-        <div className="text-center mb-4">
-          <img src="https://via.placeholder.com/100" alt="Profile" className="rounded-circle" />
-          <h5 className="mt-2">OrMe</h5>
-          <p className="text-light">OrMe@gmail.com</p>
-        </div>
-        <ul className="list-unstyled">
-          <li className="mb-3">📊 Dashboard</li>
-          <li className="mb-3 bg-light text-dark p-2 rounded fw-bold">✅ My Task</li>
-          <li className="mb-3">📂 Task Categories</li>
-          <li className="mb-3">⚙️ Settings</li>
-          <li className="mb-3">🔓 Logout</li>
-        </ul>
-      </div>
-
       {/* Main Content */}
       <div className="flex-grow-1 p-4 bg-light">
         <div className="d-flex justify-content-between align-items-center mb-4">
