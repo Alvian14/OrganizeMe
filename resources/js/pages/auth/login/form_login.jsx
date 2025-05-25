@@ -47,7 +47,7 @@ export default function Login() {
                                 right: '40%',
                                 width: '80px',
                                 height: '80px',
-                                opacity: '0.5'
+                                opacity: '1.0'
                             }}>
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
@@ -60,7 +60,7 @@ export default function Login() {
                                 right: '20%',
                                 width: '100px',
                                 height: '100px',
-                                opacity: '0.07'
+                                opacity: '0.7'
                             }}>
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#CCCCCC" />
@@ -73,7 +73,7 @@ export default function Login() {
                                 right: '50%',
                                 width: '120px',
                                 height: '120px',
-                                opacity: '0.5'
+                                opacity: '0.9'
                             }}>
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
@@ -86,7 +86,7 @@ export default function Login() {
                                 right: '15%',
                                 width: '90px',
                                 height: '90px',
-                                opacity: '0.6'
+                                opacity: '1.0'
                             }}>
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
