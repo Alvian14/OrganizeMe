@@ -1,14 +1,16 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import "bootstrap-icons/font/bootstrap-icons.css";
+
 
 export default function Sidebar() {
     return (
         <div
-            className="bg-secondary text-white p-3"
+            className="text-white p-3"
             style={{
                 width: "250px",
-                borderTopRightRadius: "20px",
-                borderBottomRightRadius: "20px",
+                backgroundColor: "#0E2148",  // <-- ini warna backgroundnya
+                overflowY: "hidden" // supaya gak bisa di scroll
             }}
         >
             <div className="text-center mb-4">
@@ -64,8 +66,7 @@ export default function Sidebar() {
                             }`
                         }
                     >
-                        <i className="bi bi-layout-text-sidebar-reverse me-2" />{" "}
-                        Task Categories
+                        <i className="bi bi-layout-text-sidebar-reverse me-2" /> Task Categories
                     </NavLink>
                 </li>
 
