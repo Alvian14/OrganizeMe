@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, Button, Form, Container, Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+// import DashboardLayout from "../../components/layouts/admin/DashboardLayout";
 
 const AccountInfoPage = () => {
   return (
