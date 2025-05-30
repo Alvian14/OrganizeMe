@@ -18,12 +18,14 @@ export default function App() {
         <Route path="/" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/settings" element={<AccountInfoPage />} /> {/* 👈 Tambahan jika ingin rute langsung */}
 
         {/* Protected Dashboard routes with layout */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<TaskDashboard />} />
           <Route path="/mytask" element={<MyTask />} />
           <Route path="/dashboard/task-categories" element={<TaskCategories />} />
+          <Route path="/dashboard/settings" element={<AccountInfoPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
