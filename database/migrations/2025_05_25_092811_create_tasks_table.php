@@ -17,16 +17,11 @@ return new class extends Migration
             $table->text('description');
             $table->string('image');
             $table->dateTime('deadline');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('category_id');
-            $table->unsignedBigInteger('status_id');
-            $table->unsignedBigInteger('priority_id');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignId('status_id')->constrained('task_statuses')->onDelete('cascade');
+            $table->foreignId('priority_id')->constrained('priority_levels')->onDelete('cascade');
             $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
-            $table->foreign('status_id')->references('id')->on('task_statuses')->onDelete('cascade');
-            $table->foreign('priority_id')->references('id')->on('priority_levels')->onDelete('cascade');
         });
     }
 
