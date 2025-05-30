@@ -18,7 +18,7 @@ h2 {
 
 .sidebar {
   background-color: #d9d9d9;
-  width: 220px;
+  width: auto;
   padding: 1rem;
   display: flex;
   flex-direction: column;

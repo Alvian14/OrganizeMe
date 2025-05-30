@@ -1,6 +1,9 @@
+
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
+
+
 
 export default function Sidebar() {
     const navigate = useNavigate();
@@ -15,6 +18,7 @@ export default function Sidebar() {
     };
 
     return (
+
         <>
             <div
                 className="bg-secondary text-white p-3"
@@ -33,6 +37,8 @@ export default function Sidebar() {
                     <h5 className="mt-2 mb-0">OrMe</h5>
                     <small>OrMe@gmail.com</small>
                 </div>
+
+
 
                 <ul className="nav flex-column">
                     <li className="nav-item mb-2">
@@ -66,6 +72,7 @@ export default function Sidebar() {
                         </NavLink>
                     </li>
 
+
                     <li className="nav-item mb-2">
                         <NavLink
                             to="/dashboard/task-categories"
@@ -81,6 +88,7 @@ export default function Sidebar() {
                             Task Categories
                         </NavLink>
                     </li>
+=
 
                     <li className="nav-item mb-2">
                         <NavLink

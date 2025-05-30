@@ -1,33 +1,52 @@
 import React from "react";
-import { Card, Button, Form } from "react-bootstrap";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { Card, Button } from "react-bootstrap";
+import { Folder, Calendar, Trash, Pencil } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const MyTaskPage = () => {
   return (
-    <div className="d-flex">
-      {/* Main Content */}
-      <div className="flex-grow-1 p-4 bg-light">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <input type="text" className="form-control w-50 me-3" placeholder="Search your task here..." />
-          <div className="d-flex align-items-center">
-            <Button variant="outline-secondary" className="me-2">📁</Button>
-            <Button variant="outline-secondary" className="me-2">📅</Button>
+    <div className="d-flex flex-column flex-md-row min-vh-100 bg-light">
+      <div className="flex-grow-1 p-4">
+        {/* Header: Search & Icons */}
+        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+          <input
+            type="text"
+            className="form-control w-100 w-md-50"
+            placeholder="Search your task here..."
+            style={{ maxWidth: "400px" }}
+          />
+          <div className="d-flex align-items-center gap-3">
+            <Button
+              variant="outline-secondary"
+              className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
+              style={{ width: 42, height: 42 }}
+              title="Folders"
+            >
+              <Folder size={20} />
+            </Button>
+            <Button
+              variant="outline-secondary"
+              className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
+              style={{ width: 42, height: 42 }}
+              title="Calendar"
+            >
+              <Calendar size={20} />
+            </Button>
             <div className="text-end">
-              <strong>Tuesday</strong><br />
+              <strong className="d-block">Tuesday</strong>
               <small className="text-muted">20/06/2023</small>
             </div>
           </div>
         </div>
 
-        <div className="row">
+        <div className="row g-4">
           {/* Task List */}
           <div className="col-md-6">
-            <Card className="mb-4 shadow-sm border-0">
+            <Card className="shadow-sm border-0">
               <Card.Body>
                 <h5 className="fw-bold mb-4 text-danger">My Tasks</h5>
 
-                <div className="border p-3 rounded mb-3 bg-white">
+                <div className="border p-3 rounded mb-3 bg-white shadow-sm">
                   <h6 className="text-danger">Submit Documents</h6>
                   <p className="mb-1 text-muted" style={{ fontSize: "0.9rem" }}>
                     Make sure to submit all the necessary documents...
@@ -37,7 +56,7 @@ const MyTaskPage = () => {
                   </small>
                 </div>
 
-                <div className="border p-3 rounded bg-white">
+                <div className="border p-3 rounded bg-white shadow-sm">
                   <h6 className="text-primary">Complete assignments</h6>
                   <p className="mb-1 text-muted" style={{ fontSize: "0.9rem" }}>
                     The assignments must be completed to pass final year...
@@ -52,7 +71,7 @@ const MyTaskPage = () => {
 
           {/* Task Details */}
           <div className="col-md-6">
-            <Card className="mb-4 shadow-sm border-0">
+            <Card className="shadow-sm border-0">
               <Card.Body>
                 <h5 className="fw-bold text-danger">Submit Documents</h5>
                 <p className="mb-1 text-muted">Priority: <span className="text-danger">Extreme</span></p>
@@ -60,8 +79,10 @@ const MyTaskPage = () => {
                 <p className="mb-3 text-muted">Created on: 20/06/2023</p>
 
                 <p><strong>Task Title:</strong> Document Submission.</p>
-                <p><strong>Objective:</strong> To submit required documents for something important</p>
-                <p><strong>Task Description:</strong> Review the list of documents required for submission and ensure all necessary documents are ready. Organize the documents accordingly and scan them if physical copies need to be submitted digitally. Rename the scanned files appropriately for easy identification and verify the accepted file formats. Upload the documents securely to the designated platform, double-check for accuracy, and obtain confirmation of successful submission. Follow up if necessary to ensure proper processing.</p>
+                <p><strong>Objective:</strong> To submit required documents for something important.</p>
+                <p>
+                  <strong>Task Description:</strong> Review the list of documents required for submission and ensure all necessary documents are ready. Organize the documents accordingly and scan them if physical copies need to be submitted digitally. Rename the scanned files appropriately for easy identification and verify the accepted file formats. Upload the documents securely to the designated platform, double-check for accuracy, and obtain confirmation of successful submission. Follow up if necessary to ensure proper processing.
+                </p>
 
                 <p><strong>Additional Notes:</strong></p>
                 <ul>
@@ -72,9 +93,13 @@ const MyTaskPage = () => {
 
                 <p><strong>Deadline for Submission:</strong> End of Day</p>
 
-                <div className="d-flex gap-2 mt-3">
-                  <Button variant="danger"><FaTrash /></Button>
-                  <Button variant="warning"><FaEdit /></Button>
+                <div className="d-flex gap-3 mt-3">
+                  <Button variant="danger" title="Delete Task" className="d-flex align-items-center justify-content-center" style={{ width: 42, height: 42 }}>
+                    <Trash size={18} />
+                  </Button>
+                  <Button variant="warning" title="Edit Task" className="d-flex align-items-center justify-content-center" style={{ width: 42, height: 42 }}>
+                    <Pencil size={18} />
+                  </Button>
                 </div>
               </Card.Body>
             </Card>
