@@ -8,7 +8,7 @@ import Register from "../pages/auth/register/form_register";
 import DashboardLayout from './layouts/DashboardLayout';
 import TaskDashboard from "../pages/dasboard/TaskDashboard";
 import MyTask from "../pages/mytask";
-import TaskCategories from "../pages/dasboard/taskcategories/TaskCategories";
+import TaskCategories from "../pages/taskcategories/TaskCategories";
 
 export default function App() {
   return (

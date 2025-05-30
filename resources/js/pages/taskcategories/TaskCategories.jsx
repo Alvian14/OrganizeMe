@@ -1,7 +1,7 @@
 import React from 'react';
 import TaskStatusTable from './TaskStatusTable';
 import TaskPriorityTable from './TaskPriorityTable';
-import Sidebar from '../../../components/layouts/Sidebar';
+import Sidebar from '../../components/layouts/Sidebar';
 
 export default function TaskCategoryPage() {
   return (
