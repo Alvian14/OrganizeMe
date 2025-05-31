@@ -12,7 +12,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::get('/categories', [CategoryController::class, 'index']);
+// Route::get('/categories', [CategoryController::class, 'index']);
 
 //api priority
 Route::apiResource('/priority', PriorityLevelController::class);
@@ -21,4 +21,5 @@ Route::apiResource('/priority', PriorityLevelController::class);
 Route::apiResource('/statuses', TaskStatusController::class);
 
 //api task
-Route::apiResource('/task', TaskController::class);
+Route::apiResource('/tasks', TaskController::class);
+

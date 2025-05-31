@@ -13,6 +13,15 @@ class TaskSeeder extends Seeder
      */
     public function run(): void
     {
-        
+        Task::create([
+            'title' => 'Implementasi Sistem Login',
+                'description' => 'Membuat sistem autentikasi dan otorisasi untuk aplikasi web dengan fitur login, logout, dan middleware authentication.',
+                'image' => 'images/tasks/login-system.jpg',
+                'deadline' => '2025-06-07 10:27:00',
+                'user_id' => 1,
+                'category_id' => 1, 
+                'status_id' => 1, 
+                'priority_id' => 1, 
+        ]);
     }
 }
