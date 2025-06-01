@@ -157,9 +157,9 @@ const TaskDashboard = () => {
             <Form.Group className="mb-3">
               <Form.Label>Priority</Form.Label>
               <div>
-                <Form.Check inline label="Extreme" name="priority" type="radio" id="priority-extreme" />
-                <Form.Check inline label="Moderate" name="priority" type="radio" id="priority-moderate" />
-                <Form.Check inline label="Low" name="priority" type="radio" id="priority-low" />
+                <Form.Check inline label="Low" name="priority" type="radio" id="priority-extreme" />
+                <Form.Check inline label="Hight" name="priority" type="radio" id="priority-moderate" />
+                <Form.Check inline label="Extreme" name="priority" type="radio" id="priority-low" />
               </div>
             </Form.Group>
 
