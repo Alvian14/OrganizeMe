@@ -79,7 +79,7 @@ export default function Navbar() {
       {/* === Logout Button === */}
       <div className="mt-auto">
         <NavLink
-          to="/logout"
+          to="/"
           className="btn btn-outline-light w-100 d-flex align-items-center justify-content-center"
         >
           <i className="bi bi-box-arrow-right me-2" />

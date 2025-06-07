@@ -73,7 +73,7 @@ export default function Sidebar() {
 
                 <li className="nav-item mb-2">
                     <NavLink
-                        to="/settings"
+                        to="/dashboard/settings"
                         className="nav-link d-flex align-items-center text-white"
                     >
                         <i className="bi bi-gear me-2" /> Settings
