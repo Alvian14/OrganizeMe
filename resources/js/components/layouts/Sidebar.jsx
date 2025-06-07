@@ -56,7 +56,7 @@ export default function Sidebar() {
                     </NavLink>
                 </li>
 
-                <li className="nav-item mb-2">
+                {/* <li className="nav-item mb-2">
                     <NavLink
                         to="/dashboard/task-categories"
                         className={({ isActive }) =>
@@ -69,7 +69,7 @@ export default function Sidebar() {
                     >
                         <i className="bi bi-layout-text-sidebar-reverse me-2" /> Task Categories
                     </NavLink>
-                </li>
+                </li> */}
 
                 <li className="nav-item mb-2">
                     <NavLink
