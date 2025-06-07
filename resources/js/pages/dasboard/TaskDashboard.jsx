@@ -24,13 +24,6 @@ const TaskDashboard = () => {
             variant="outline-secondary"
             className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
             style={{ width: 42, height: 42 }}
-            title="Folders">
-            <Folder size={20} />
-          </Button>
-          <Button
-            variant="outline-secondary"
-            className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
-            style={{ width: 42, height: 42 }}
             title="Calendar">
             <Calendar size={20} />
           </Button>
@@ -47,9 +40,9 @@ const TaskDashboard = () => {
           <h4 className="text-primary mb-4 fw-bold">Task Status</h4>
           <div className="d-flex justify-content-around">
             {[
+              { label: "Not Started", count: 46, color: "danger", icon: <XCircleFill size={28} /> },
               { label: "In Progress", count: 46, color: "warning", icon: <ClockFill size={28} /> },
               { label: "Completed", count: 40, color: "success", icon: <CheckCircleFill size={28} /> },
-              { label: "Not Started", count: 46, color: "danger", icon: <XCircleFill size={28} /> },
             ].map(({ label, count, color, icon }) => (
               <div key={label} className="d-flex flex-column align-items-center">
                 <div className={`text-${color} mb-2`}>{icon}</div>
@@ -158,8 +151,8 @@ const TaskDashboard = () => {
               <Form.Label>Priority</Form.Label>
               <div>
                 <Form.Check inline label="Low" name="priority" type="radio" id="priority-extreme" />
-                <Form.Check inline label="Hight" name="priority" type="radio" id="priority-moderate" />
-                <Form.Check inline label="Extreme" name="priority" type="radio" id="priority-low" />
+                <Form.Check inline label="Medium" name="priority" type="radio" id="priority-moderate" />
+                <Form.Check inline label="Hight" name="priority" type="radio" id="priority-low" />
               </div>
             </Form.Group>
 
