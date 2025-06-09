@@ -8,7 +8,6 @@ import Register from "../pages/auth/register/form_register";
 import DashboardLayout from './layouts/DashboardLayout';
 import TaskDashboard from "../pages/dasboard/TaskDashboard";
 import MyTask from "../pages/mytask";
-import TaskCategories from "../pages/taskcategories/TaskCategories";
 import AccountInfoPage from '../pages/settings';
 import TopNavbar from './layouts/admin/Navbar';
 import UsersPageAdmin from '../pages/admin/UsersPageAdmin';
@@ -29,21 +28,14 @@ export default function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<TaskDashboard />} />
           <Route path="/mytask" element={<MyTask />} />
-          {/* <Route path="/dashboard/task-categories" element={<TaskCategories />} /> */}
           <Route path="/dashboard/settings" element={<AccountInfoPage/>} />
         </Route>
 
-        <Route element={<DashboardAdmin />}>
-        <Route path="/admin/user-page-admin" element={<UsersPageAdmin />} />
-        <Route path="/admin/task-admin" element={<TaskAdmin />} />
-
-
+        <Route element={<DashboardAdmin/>}>
+        <Route path="/admin/user-page-admin" element={<UsersPageAdmin/>} />
+        <Route path="/admin/task-admin" element={<TaskAdmin/>} />
         </Route>
-        
-{/* 
-        <Route element={<DashboardAdmin />}>
-          
-          </Route>         */}
+
 
       </Routes>
     </BrowserRouter>

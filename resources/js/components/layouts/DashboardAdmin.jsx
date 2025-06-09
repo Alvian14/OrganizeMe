@@ -10,7 +10,7 @@ export default function DashboardAdmin() {
       </div>
 
       <div className="d-flex flex-column flex-grow-1">
-        
+
         <main className="flex-grow-1 overflow-auto p-4 bg-light">
           <Outlet />
         </main>

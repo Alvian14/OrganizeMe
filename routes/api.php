@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PriorityLevelController;
 use App\Http\Controllers\TaskController;
@@ -11,7 +12,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// Route::get('/categories', [CategoryController::class, 'index']);
+Route::apiResource('/users', AuthController::class);
 
 //api priority
 Route::apiResource('/priority', PriorityLevelController::class);
