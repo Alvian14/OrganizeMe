@@ -22,18 +22,17 @@ export default function Navbar() {
         <h6 className="text-light">Menu</h6>
         <ul className="nav flex-column">
 
-        <li className="nav-item">
+          <li className="nav-item">
             <NavLink
               to="/admin/user-page-admin"
               className={({ isActive }) =>
-                `nav-link d-flex align-items-center ${
-                  isActive
-                    ? "bg-light text-dark rounded p-2"
-                    : "text-white"
+                `nav-link d-flex align-items-center gap-2 ${
+                  isActive ? "bg-light text-dark rounded p-2" : "text-white"
                 }`
               }
             >
-              👥 Users
+              <i className="bi bi-people-fill" />
+              Users
             </NavLink>
           </li>
 
@@ -41,17 +40,16 @@ export default function Navbar() {
             <NavLink
               to="/admin/task-admin"
               className={({ isActive }) =>
-                `nav-link d-flex align-items-center ${
-                  isActive
-                    ? "bg-light text-dark rounded p-2"
-                    : "text-white"
+                `nav-link d-flex align-items-center gap-2 ${
+                  isActive ? "bg-light text-dark rounded p-2" : "text-white"
                 }`
               }
             >
-              ✅Tasks
+              <i className="bi bi-check2-square" />
+              Tasks
             </NavLink>
           </li>
-         
+
         </ul>
       </div>
 
@@ -63,14 +61,13 @@ export default function Navbar() {
             <NavLink
               to="/admin/settings"
               className={({ isActive }) =>
-                `nav-link d-flex align-items-center ${
-                  isActive
-                    ? "bg-light text-dark rounded p-2"
-                    : "text-white"
+                `nav-link d-flex align-items-center gap-2 ${
+                  isActive ? "bg-light text-dark rounded p-2" : "text-white"
                 }`
               }
             >
-              ⚙️ Account Settings
+              <i className="bi bi-gear-fill" />
+              Account Settings
             </NavLink>
           </li>
         </ul>
@@ -80,9 +77,9 @@ export default function Navbar() {
       <div className="mt-auto">
         <NavLink
           to="/"
-          className="btn btn-outline-light w-100 d-flex align-items-center justify-content-center"
+          className="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2"
         >
-          <i className="bi bi-box-arrow-right me-2" />
+          <i className="bi bi-box-arrow-right" />
           Logout
         </NavLink>
       </div>

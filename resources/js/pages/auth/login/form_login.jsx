@@ -1,101 +1,120 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../../../_services/auth";
 
 export default function Login() {
-    return (
-        <div className="login-container w-100 min-vh-100 bg-white d-flex align-items-center">
-            <div className="container-fluid">
-                <div className="row">
-                    {/* Left side content */}
-                    <div className="col-md-6 p-5">
-                        <div className="login-content">
-                            <h1 className="display-4 fw-bold mb-3">OrganizeMe</h1>
-                            <p className="lead mb-5">Pick some new habits to get started</p>
-                            
-                            <div className="login-form mt-4">
-                                <div className="mb-4">
-                                    <label htmlFor="username" className="form-label">Username</label>
-                                    <input 
-                                        type="text" 
-                                        className="form-control form-control-lg border rounded" 
-                                        id="username" 
-                                    />
-                                </div>
-                                
-                                <div className="mb-5">
-                                    <label htmlFor="password" className="form-label">Password</label>
-                                    <input 
-                                        type="password" 
-                                        className="form-control form-control-lg border rounded" 
-                                        id="password" 
-                                    />
-                                </div>
-                                
-                                <div className="d-flex mt-4">
-                                    <button type="submit" className="btn btn-secondary px-4 py-2 me-3">Sign In</button>
-                                    <Link to="/register" className="btn btn-light px-4 py-2">Sign Up</Link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Right side with stars decoration */}
-                    <div className="col-md-6 position-relative">
-                        <div className="stars-decoration w-100 h-100">
-                            {/* Star 1 - Top middle */}
-                            <div className="star star-1 position-absolute" style={{
-                                top: '15%',
-                                right: '40%',
-                                width: '80px',
-                                height: '80px',
-                                opacity: '1.0'
-                            }}>
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
-                                </svg>
-                            </div>
-                            
-                            {/* Star 2 - Middle right */}
-                            <div className="star star-2 position-absolute" style={{
-                                top: '45%',
-                                right: '20%',
-                                width: '100px',
-                                height: '100px',
-                                opacity: '0.7'
-                            }}>
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#CCCCCC" />
-                                </svg>
-                            </div>
-                            
-                            {/* Star 3 - Bottom left */}
-                            <div className="star star-3 position-absolute" style={{
-                                bottom: '20%',
-                                right: '50%',
-                                width: '120px',
-                                height: '120px',
-                                opacity: '0.9'
-                            }}>
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
-                                </svg>
-                            </div>
-                            
-                            {/* Star 4 - Bottom right */}
-                            <div className="star star-4 position-absolute" style={{
-                                bottom: '10%',
-                                right: '15%',
-                                width: '90px',
-                                height: '90px',
-                                opacity: '1.0'
-                            }}>
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await loginUser(formData); // asumsikan loginUser akan menyimpan token atau session
+      navigate("/dashboard"); // ubah sesuai path tujuan setelah login
+    } catch (error) {
+      console.error(error.response?.data);
+      alert("Login gagal: " + (error.response?.data?.message || "Periksa kembali username dan password"));
+    }
+  };
+
+  return (
+    <div className="d-flex flex-column justify-content-center align-items-center min-vh-100 bg-white">
+      {/* Judul di atas form */}
+      <div className="mb-3 text-center">
+        <h1
+          className="fw-bold"
+          style={{
+            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+            fontSize: "1.8rem",
+            color: "#0E2148",
+            userSelect: "none",
+          }}
+        >
+          <span style={{ color: "#0E2148" }}>Or</span>ganize
+          <span style={{ color: "#4ECDC4" }}>Me</span>
+        </h1>
+      </div>
+
+      {/* Kotak form login */}
+      <div
+        className="rounded-4 shadow p-4 text-white"
+        style={{
+          background: "linear-gradient(135deg, #1e3c72, #2a5298)",
+          width: "100%",
+          maxWidth: "400px",
+        }}
+      >
+        <div className="text-center mb-3">
+          <h2 style={{ color: "#ff9800" }}>Log In</h2>
+          <p style={{ fontSize: "0.9rem" }}>
+            Log in to manage your habits efficiently
+          </p>
         </div>
-    );
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="username" className="form-label fw-semibold">
+              Username
+            </label>
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              id="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              style={{ fontSize: "0.9rem" }}
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="password" className="form-label fw-semibold">
+              Password
+            </label>
+            <input
+              type="password"
+              className="form-control form-control-sm"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              style={{ fontSize: "0.9rem" }}
+            />
+          </div>
+
+          <div className="d-flex gap-2">
+            <button
+              type="submit"
+              className="btn btn-sm flex-grow-1 text-white"
+              style={{
+                fontSize: "0.9rem",
+                backgroundColor: "#ff9800",
+                border: "none",
+              }}
+            >
+              Login
+            </button>
+            <Link
+              to="/register"
+              className="btn btn-outline-light btn-sm flex-grow-1"
+              style={{ fontSize: "0.9rem" }}
+            >
+              Register
+            </Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }

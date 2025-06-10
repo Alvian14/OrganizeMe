@@ -40,6 +40,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'api' => [
+            'driver' => 'jwt', // driver token bawaan Laravel
+            'provider' => 'users',
+            'hash' => false,     // biasanya false kalau tidak pakai hashing token
+        ],
     ],
 
     /*

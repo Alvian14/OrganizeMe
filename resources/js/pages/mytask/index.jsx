@@ -20,14 +20,6 @@ const MyTaskPage = () => {
               variant="outline-secondary"
               className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
               style={{ width: 42, height: 42 }}
-              title="Folders"
-            >
-              <Folder size={20} />
-            </Button>
-            <Button
-              variant="outline-secondary"
-              className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
-              style={{ width: 42, height: 42 }}
               title="Calendar"
             >
               <Calendar size={20} />

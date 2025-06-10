@@ -45,30 +45,48 @@ const TaskDashboard = () => {
           style={{ maxWidth: "400px" }}
         />
         <div className="d-flex align-items-center gap-3">
-          <Button
+            <Button
             variant="outline-secondary"
-            className="rounded-circle shadow-sm"
+            className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
             style={{ width: 42, height: 42 }}
             title="Calendar"
-          >
-            <Calendar size={20} />
-          </Button>
-          <div className="text-end">
-            <strong className="d-block">Friday</strong>
-            <small className="text-muted">07/06/2025</small>
-          </div>
+            >
+                <Calendar size={20} />
+            </Button>
+            <div className="text-end">
+                <strong className="d-block">Tuesday</strong>
+                <small className="text-muted">20/06/2023</small>
+            </div>
         </div>
       </div>
 
       {/* Task Overview */}
       <Card className="mb-5 shadow border-0 rounded-4">
         <Card.Body className="text-center">
-          <h4 className="fw-bold text-primary mb-4">📊 Task Overview</h4>
+          <h4 className="fw-bold text-primary mb-4">
+            <Calendar className="me-2" />
+            Task Overview
+          </h4>
           <div className="d-flex justify-content-around flex-wrap gap-4">
             {[
-              { label: "Not Started", count: 12, color: "danger", icon: <XCircleFill size={48} /> },
-              { label: "In Progress", count: 8, color: "warning", icon: <ClockFill size={48} /> },
-              { label: "Completed", count: 20, color: "success", icon: <CheckCircleFill size={48} /> },
+              {
+                label: "Not Started",
+                count: 12,
+                color: "danger",
+                icon: <XCircleFill size={48} />,
+              },
+              {
+                label: "In Progress",
+                count: 8,
+                color: "warning",
+                icon: <ClockFill size={48} />,
+              },
+              {
+                label: "Completed",
+                count: 20,
+                color: "success",
+                icon: <CheckCircleFill size={48} />,
+              },
             ].map(({ label, count, color, icon }) => (
               <div
                 key={label}
@@ -91,8 +109,16 @@ const TaskDashboard = () => {
           <Card className="shadow rounded-4 border-0 h-100">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center mb-4">
-                <h5 className="text-primary fw-bold">📝 To-Do Tasks</h5>
-                <Button variant="primary" size="sm" onClick={handleShow} className="rounded-pill px-4">
+                <h5 className="text-primary fw-bold">
+                  <BellFill className="me-2" />
+                  To-Do Tasks
+                </h5>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleShow}
+                  className="rounded-pill px-4"
+                >
                   + Add Task
                 </Button>
               </div>
@@ -102,8 +128,12 @@ const TaskDashboard = () => {
                   <BellFill className="me-2" size={18} />
                   Buy groceries
                 </h6>
-                <p className="text-secondary small">Pick up vegetables, rice, and fruits.</p>
-                <Badge bg="danger" className="me-2">High</Badge>
+                <p className="text-secondary small">
+                  Pick up vegetables, rice, and fruits.
+                </p>
+                <Badge bg="danger" className="me-2">
+                  High
+                </Badge>
                 <Badge bg="secondary">Not Started</Badge>
                 <small className="d-block text-muted mt-2">Due: 09/06/2025</small>
               </div>
@@ -114,7 +144,9 @@ const TaskDashboard = () => {
                   Frontend Review
                 </h6>
                 <p className="text-secondary small">Review UI/UX with the team.</p>
-                <Badge bg="warning" className="me-2 text-dark">Medium</Badge>
+                <Badge bg="warning" className="me-2 text-dark">
+                  Medium
+                </Badge>
                 <Badge bg="primary">In Progress</Badge>
                 <small className="d-block text-muted mt-2">Due: 08/06/2025</small>
               </div>
@@ -126,7 +158,10 @@ const TaskDashboard = () => {
         <div className="col-md-6">
           <Card className="shadow rounded-4 border-0 h-100">
             <Card.Body>
-              <h5 className="text-success fw-bold mb-4">✅ Completed Tasks</h5>
+              <h5 className="text-success fw-bold mb-4">
+                <CheckCircleFill className="me-2" />
+                Completed Tasks
+              </h5>
 
               <div className="mb-3 p-3 rounded bg-white shadow-sm border">
                 <h6 className="fw-semibold text-success mb-1">
@@ -155,7 +190,10 @@ const TaskDashboard = () => {
       {/* Add Task Modal */}
       <Modal show={showModal} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title><ImageFill className="me-2" />Add New Task</Modal.Title>
+          <Modal.Title>
+            <ImageFill className="me-2" />
+            Add New Task
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -201,8 +239,12 @@ const TaskDashboard = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" onClick={handleClose}>Save Task</Button>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleClose}>
+            Save Task
+          </Button>
         </Modal.Footer>
       </Modal>
     </Container>

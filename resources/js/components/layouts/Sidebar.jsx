@@ -4,7 +4,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 
 export default function Sidebar() {
-    
+
     return (
         <div
             className="text-white p-3"
@@ -74,7 +74,13 @@ export default function Sidebar() {
                 <li className="nav-item mb-2">
                     <NavLink
                         to="/dashboard/settings"
-                        className="nav-link d-flex align-items-center text-white"
+                        className={({ isActive }) =>
+                            `nav-link d-flex align-items-center ${
+                                isActive
+                                    ? "bg-white text-dark rounded p-2"
+                                    : "text-white"
+                            }`
+                        }
                     >
                         <i className="bi bi-gear me-2" /> Settings
                     </NavLink>

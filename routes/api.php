@@ -12,7 +12,9 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::apiResource('/users', AuthController::class);
+// Route::apiResource('users', AuthController::class);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
 //api priority
 Route::apiResource('/priority', PriorityLevelController::class);

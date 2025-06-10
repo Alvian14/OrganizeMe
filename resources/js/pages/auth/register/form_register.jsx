@@ -1,115 +1,178 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { registerUser } from "../../../_services/auth";
 
 export default function Register() {
-    return (
-        <div className="register-container w-100 min-vh-100 bg-white d-flex align-items-center">
-            <div className="container-fluid">
-                <div className="row">
-                    {/* Left side content */}
-                    <div className="col-md-6 p-5">
-                        <div className="register-content">
-                            <h1 className="display-4 fw-bold mb-3">OrganizeMe</h1>
-                            <p className="lead mb-5">Pick some new habits to get started</p>
-                            
-                            <div className="register-form mt-4">
-                                <div className="mb-3">
-                                    <label htmlFor="username" className="form-label">Username</label>
-                                    <input 
-                                        type="text" 
-                                        className="form-control form-control-lg border rounded" 
-                                        id="username" 
-                                    />
-                                </div>
-                                
-                                <div className="mb-3">
-                                    <label htmlFor="password" className="form-label">Password</label>
-                                    <input 
-                                        type="password" 
-                                        className="form-control form-control-lg border rounded" 
-                                        id="password" 
-                                    />
-                                </div>
-                                
-                                <div className="mb-4">
-                                    <label htmlFor="email" className="form-label">Email</label>
-                                    <input 
-                                        type="email" 
-                                        className="form-control form-control-lg border rounded" 
-                                        id="email" 
-                                    />
-                                </div>
-                                
-                                <div className="mt-4 d-flex justify-content-end">
-                                    <button type="submit" className="btn btn-outline-dark px-5 py-2">GO</button>
-                                </div>
-                                
-                                <div className="mt-3">
-                                    <p>
-                                        Already have an account? <Link to="/">Sign In</Link>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Right side with stars decoration */}
-                    <div className="col-md-6 position-relative">
-                        <div className="stars-decoration w-100 h-100">
-                            {/* Star 1 - Top right */}
-                            <div className="star star-1 position-absolute" style={{
-                                top: '10%',
-                                right: '15%',
-                                width: '80px',
-                                height: '80px',
-                                opacity: '0.9'
-                            }}>
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
-                                </svg>
-                            </div>
-                            
-                            {/* Star 2 - Middle right (darker) */}
-                            <div className="star star-2 position-absolute" style={{
-                                top: '45%',
-                                right: '30%',
-                                width: '100px',
-                                height: '100px',
-                                opacity: '0.8'
-                            }}>
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#A0A0A0" />
-                                </svg>
-                            </div>
-                            
-                            {/* Star 3 - Bottom middle */}
-                            <div className="star star-3 position-absolute" style={{
-                                bottom: '20%',
-                                right: '50%',
-                                width: '120px',
-                                height: '120px',
-                                opacity: '0.9'
-                            }}>
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
-                                </svg>
-                            </div>
-                            
-                            {/* Star 4 - Bottom right */}
-                            <div className="star star-4 position-absolute" style={{
-                                bottom: '10%',
-                                right: '15%',
-                                width: '90px',
-                                height: '90px',
-                                opacity: '0.9'
-                            }}>
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" fill="#E6E6E6" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    email: "",
+  });
+
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await registerUser(formData);
+      setShowSuccessPopup(true);
+    } catch (error) {
+      console.error(error.response?.data);
+      alert("Gagal registrasi: " + (error.response?.data?.message || "Terjadi kesalahan."));
+    }
+  };
+
+  return (
+    <div
+      className="d-flex flex-column justify-content-center align-items-center min-vh-100"
+      style={{
+        background: "linear-gradient(135deg, #1e3c72, #2a5298)",
+        padding: "1rem",
+      }}
+    >
+      {/* Judul OrganizeMe */}
+      <div className="mb-3 text-center">
+        <h1
+          className="fw-bold"
+          style={{
+            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+            fontSize: "1.8rem",
+            color: "#ffffff",
+            userSelect: "none",
+          }}
+        >
+          <span style={{ color: "#ffffff" }}>Or</span>ganize
+          <span style={{ color: "#4ECDC4" }}>Me</span>
+        </h1>
+      </div>
+
+      {/* Kotak Form (putih) */}
+      <div
+        className="rounded-4 shadow p-4"
+        style={{
+          backgroundColor: "#ffffff",
+          width: "100%",
+          maxWidth: "400px",
+          color: "#0E2148",
+        }}
+      >
+        <div className="text-center mb-3">
+             <h2 style={{color: "#ff9800"}}>Register</h2>
+          <p style={{ fontSize: "0.9rem" }}>
+            Register to manage your habits efficiently
+          </p>
         </div>
-    );
+        <br></br>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="username" className="form-label fw-semibold">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              className="form-control form-control-sm"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              style={{ fontSize: "0.9rem" }}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label fw-semibold">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="form-control form-control-sm"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              style={{ fontSize: "0.9rem" }}
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="password" className="form-label fw-semibold">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              className="form-control form-control-sm"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              style={{ fontSize: "0.9rem" }}
+            />
+          </div>
+            <br></br>
+          <button
+            type="submit"
+            className="btn btn-sm w-100 text-white"
+            style={{
+              backgroundColor: "#ff9800",
+              border: "none",
+              fontSize: "0.9rem",
+            }}
+          >
+            Daftar
+          </button>
+
+          <p className="mt-3 text-center text-muted" style={{ fontSize: "0.85rem" }}>
+            Sudah punya akun? <Link to="/" className="text-decoration-underline">Login di sini</Link>
+          </p>
+        </form>
+      </div>
+
+      {/* Pop-up Sukses */}
+      {showSuccessPopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "2rem 3rem",
+              borderRadius: "8px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+              textAlign: "center",
+              maxWidth: "400px",
+              width: "90%",
+            }}
+          >
+            <h3>Registrasi Berhasil!</h3>
+            <p>Silakan klik tombol di bawah untuk login.</p>
+            <button className="btn btn-primary px-4 py-2" onClick={() => navigate("/")}>
+              Login
+            </button>
+            <button className="btn btn-secondary px-4 py-2 ms-3" onClick={() => setShowSuccessPopup(false)}>
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
