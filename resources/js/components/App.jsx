@@ -1,18 +1,27 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+// Auth Pages
 import Login from '../pages/auth/login/form_login';
-import Home from '../pages';
 import Register from "../pages/auth/register/form_register";
 
+// Public Pages
+import Home from '../pages';
+import AccountInfoPage from '../pages/settings';
+
+// Dashboard Layouts
 import DashboardLayout from './layouts/DashboardLayout';
+import DashboardAdmin from './layouts/DashboardAdmin';
+
+// Dashboard Pages
 import TaskDashboard from "../pages/dasboard/TaskDashboard";
 import MyTask from "../pages/mytask";
-import AccountInfoPage from '../pages/settings';
-import TopNavbar from './layouts/admin/Navbar';
+
+// Admin Pages
 import UsersPageAdmin from '../pages/admin/UsersPageAdmin';
-import DashboardAdmin from './layouts/DashboardAdmin';
 import TaskAdmin from '../pages/admin/TaskAdmin';
+import UserTaskDetail from '../pages/admin/UserTaskDetail'; // ← Tambahkan ini
+import AccountInfoPageAdmin from '../pages/admin/AccountInfoPageAdmin';
 
 export default function App() {
   return (
@@ -22,21 +31,22 @@ export default function App() {
         <Route path="/" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/settings" element={<AccountInfoPage/>} />
+        <Route path="/settings" element={<AccountInfoPage />} />
 
-        {/* Protected Dashboard routes with layout */}
+        {/* User Dashboard routes */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<TaskDashboard />} />
           <Route path="/mytask" element={<MyTask />} />
-          <Route path="/dashboard/settings" element={<AccountInfoPage/>} />
+          <Route path="/dashboard/settings" element={<AccountInfoPage />} />
         </Route>
 
-        <Route element={<DashboardAdmin/>}>
-        <Route path="/admin/user-page-admin" element={<UsersPageAdmin/>} />
-        <Route path="/admin/task-admin" element={<TaskAdmin/>} />
+        {/* Admin Dashboard routes */}
+        <Route element={<DashboardAdmin />}>
+          <Route path="/admin/user-page-admin" element={<UsersPageAdmin />} />
+          <Route path="/admin/task-admin" element={<TaskAdmin />} />
+          <Route path="/admin/task-admin/:username" element={<UserTaskDetail />} /> {/* ← Route detail */}
+          <Route path="/admin/settings" element={<AccountInfoPageAdmin />} />
         </Route>
-
-
       </Routes>
     </BrowserRouter>
   );

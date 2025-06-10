@@ -61,7 +61,7 @@ export default function Navbar() {
         <ul className="nav flex-column">
           <li className="nav-item">
             <NavLink
-              to="/dashboard/settings"
+              to="/admin/settings"
               className={({ isActive }) =>
                 `nav-link d-flex align-items-center ${
                   isActive
