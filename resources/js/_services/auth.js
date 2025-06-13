@@ -1,3 +1,4 @@
+import { useJwt } from "react-jwt";
 import { API } from "../_api";
 
 export const getUser = async () => {
@@ -26,9 +27,35 @@ export const registerUser = async (userData) => {
   return response.data;
 };
 
-export const loginUser = async (credentials) => {
-  const response = await API.post("/login", credentials);
+export const loginUser = async ({username, password}) => {
+  const response = await API.post("/login", {username, password});
   return response.data;
 };
 
 
+export const useDecodeToken = () => {
+  const token = localStorage.getItem("accessToken");
+  const { decodedToken, isExpired } = useJwt(token);
+
+  if (!token) {
+    return {
+      success: false,
+      message: "No token",
+      data: null,
+    };
+  }
+
+  if (isExpired) {
+    return {
+      success: false,
+      message: "Token expired",
+      data: null,
+    };
+  }
+
+  return {
+    success: true,
+    message: "Token valid",
+    data: decodedToken,
+  };
+};
