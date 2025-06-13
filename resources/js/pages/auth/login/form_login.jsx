@@ -28,7 +28,7 @@ export default function Login() {
             localStorage.setItem("accessToken", response.token);
             localStorage.setItem("userInfo", JSON.stringify(response.user));
 
-            navigate(response.user.role === "admin" ? "/admin/user-page-admin" : "/dashboard");
+            return navigate(response.user.role === "admin" ? "/admin/user-page-admin" : "/dashboard");
         } catch (error) {
             alert(error?.response?.data?.message || "Login gagal");
         }
