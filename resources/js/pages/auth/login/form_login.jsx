@@ -47,8 +47,7 @@ export default function Login() {
                 <h1
                     className="fw-bold"
                     style={{
-                        fontFamily:
-                            "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
                         fontSize: "1.8rem",
                         color: "#0E2148",
                         userSelect: "none",
@@ -77,10 +76,7 @@ export default function Login() {
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <label
-                            htmlFor="username"
-                            className="form-label fw-semibold"
-                        >
+                        <label htmlFor="username" className="form-label fw-semibold">
                             Username
                         </label>
                         <input
@@ -95,10 +91,7 @@ export default function Login() {
                     </div>
 
                     <div className="mb-4">
-                        <label
-                            htmlFor="password"
-                            className="form-label fw-semibold"
-                        >
+                        <label htmlFor="password" className="form-label fw-semibold">
                             Password
                         </label>
                         <input
