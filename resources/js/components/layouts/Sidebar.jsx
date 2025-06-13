@@ -1,11 +1,22 @@
-import React from "react";
+import React, {useState} from "react";
 import { NavLink } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import LogoutModal from "../../pages/logout";
 
 
 export default function Sidebar() {
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+    const handleLogoutClick = () => {
+        setShowLogoutModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowLogoutModal(false);
+    };
 
     return (
+        <>
         <div
             className="text-white p-3"
             style={{
@@ -87,14 +98,17 @@ export default function Sidebar() {
                 </li>
 
                 <li className="nav-item">
-                    <NavLink
-                        to="/logout"
+                    <button
                         className="nav-link d-flex align-items-center text-white"
+                        onClick={handleLogoutClick}
                     >
+                        
                         <i className="bi bi-box-arrow-right me-2" /> Logout
-                    </NavLink>
+                    </button>
                 </li>
             </ul>
         </div>
+        <LogoutModal show={showLogoutModal} onHide={handleCloseModal}/>
+        </>
     );
 }

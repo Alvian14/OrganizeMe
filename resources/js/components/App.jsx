@@ -22,6 +22,7 @@ import UsersPageAdmin from '../pages/admin/UsersPageAdmin';
 import TaskAdmin from '../pages/admin/TaskAdmin';
 import UserTaskDetail from '../pages/admin/UserTaskDetail'; // ← Tambahkan ini
 import AccountInfoPageAdmin from '../pages/admin/AccountInfoPageAdmin';
+import LogoutModal from '../pages/logout';
 
 export default function App() {
   return (
@@ -32,12 +33,14 @@ export default function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/settings" element={<AccountInfoPage />} />
+        <Route path="/logout" element={<LogoutModal/>} /> 
 
         {/* User Dashboard routes */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<TaskDashboard />} />
           <Route path="/mytask" element={<MyTask />} />
-          <Route path="/dashboard/settings" element={<AccountInfoPage />} />
+          <Route path="/dashboard/settings" element={<AccountInfoPage />} />  
+          
         </Route>
 
         {/* Admin Dashboard routes */}
