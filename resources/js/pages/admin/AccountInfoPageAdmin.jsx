@@ -11,7 +11,6 @@ export default function AccountInfoPageAdmin() {
     const [formData, setFormData] = useState({
         username: "",
         email: "",
-        Image: null,
         _method: "PUT",
     });
 
@@ -22,7 +21,6 @@ export default function AccountInfoPageAdmin() {
             setFormData({
                 username: usersData.username,
                 email: usersData.email,
-                image: usersData.image,
                 _method: "PUT",
             })
         };
@@ -66,8 +64,6 @@ export default function AccountInfoPageAdmin() {
                         </Button>
                     </div>
 
-                    {/* {message && <Alert variant="info">{message}</Alert>} */}
-
                     {/* === FORM PROFIL === */}
                     {activeTab === "profile" && (
                         <Form onSubmit="">
@@ -100,20 +96,6 @@ export default function AccountInfoPageAdmin() {
                                     </Form.Group>
                                 </Col>
                             </Row>
-
-                            <Form.Group
-                                controlId="profilePicture"
-                                className="mb-3"
-                            >
-                                <Form.Label>Profile Picture</Form.Label>
-                                <Form.Control
-                                    type="file"
-                                    name="profilePicture"
-                                    onChange={userInfo.image}
-                                    accept="image/*"
-                                />
-                            </Form.Group>
-
                             <Button
                                 variant="primary"
                                 type="submit"

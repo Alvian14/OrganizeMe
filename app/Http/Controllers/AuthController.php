@@ -51,7 +51,7 @@ class AuthController extends Controller
     }
 
     // fungsi untuk update data
-    public function update(Request $request, $id)
+    public function updateRole(Request $request, $id)
     {
         $user = User::find($id);
 
@@ -65,7 +65,7 @@ class AuthController extends Controller
 
         // Validasi hanya field role
         $request->validate([
-            'role' => 'required|string|in:admin,user' // ubah sesuai opsi role yang kamu pakai
+            'role' => 'required|string|in:admin,user'
         ]);
 
         // Update hanya role

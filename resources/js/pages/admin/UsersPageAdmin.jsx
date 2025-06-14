@@ -76,34 +76,48 @@ export default function UsersPageAdmin() {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map((user, index) => (
-                                <tr key={user.id}>
-                                    <td>{index + 1}</td>
-                                    <td>{user.username}</td>
-                                    <td>{user.email}</td>
-                                    <td>{user.image}</td>
-                                    <td>{user.role}</td>
-                                    <td>
-                                        <Button
-                                            variant="warning"
-                                            size="sm"
-                                            className="me-2"
-                                            onClick={() => handleEdit(user)}
-                                        >
-                                            Edit Role
-                                        </Button>
-                                        <Button
-                                            variant="danger"
-                                            size="sm"
-                                            onClick={() =>
-                                                handleDelete(user.id)
-                                            }
-                                        >
-                                            Delete
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
+                            {[...users]
+                                .sort((a, b) => {
+                                    if (
+                                        a.role === "admin" &&
+                                        b.role !== "admin"
+                                    )
+                                        return -1;
+                                    if (
+                                        a.role !== "admin" &&
+                                        b.role === "admin"
+                                    )
+                                        return 1;
+                                    return 0;
+                                })
+                                .map((user, index) => (
+                                    <tr key={user.id}>
+                                        <td>{index + 1}</td>
+                                        <td>{user.username}</td>
+                                        <td>{user.email}</td>
+                                        <td>{user.image}</td>
+                                        <td>{user.role}</td>
+                                        <td>
+                                            <Button
+                                                variant="warning"
+                                                size="sm"
+                                                className="me-2"
+                                                onClick={() => handleEdit(user)}
+                                            >
+                                                Edit Role
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                size="sm"
+                                                onClick={() =>
+                                                    handleDelete(user.id)
+                                                }
+                                            >
+                                                Delete
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </Table>
                 </Card.Body>
