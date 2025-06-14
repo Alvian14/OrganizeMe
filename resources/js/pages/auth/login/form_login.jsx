@@ -73,8 +73,13 @@ export default function Login() {
                         Log in to manage your habits efficiently
                     </p>
                 </div>
+                {errorMessage && (
+                    <div className="alert alert-danger py-2 px-3" role="alert" style={{ fontSize: "0.9rem" }}>
+                        {errorMessage}
+                    </div>
+                    )}
+                <form onSubmit={handleSubmit} noValidate>
 
-                <form onSubmit={handleSubmit}>
                     <div className="mb-3">
                         <label htmlFor="username" className="form-label fw-semibold">
                             Username
