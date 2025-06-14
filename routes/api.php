@@ -15,6 +15,7 @@ Route::get('/user', function (Request $request) {
 Route::apiResource('users', AuthController::class);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout']);
 
 //api priority
 Route::apiResource('/priority', PriorityLevelController::class);
@@ -24,4 +25,5 @@ Route::apiResource('/statuses', TaskStatusController::class);
 
 //api task
 Route::apiResource('/tasks', TaskController::class);
+
 

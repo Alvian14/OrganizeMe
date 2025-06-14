@@ -2,14 +2,27 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { logout } from "../../_services/auth";
+
 
 export default function LogoutModal({ show, onHide }) {
   const navigate = useNavigate();
 
-  const handleLogoutConfirm = () => {
-    localStorage.removeItem("token"); // hapus token
-    onHide(); // tutup modal
-    navigate("/"); // redirect ke login
+  const handleLogoutConfirm = async () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (token) {
+      try {
+        await logout({ token });
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("userInfo");
+        navigate("/");
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+
+    onHide(); // untuk menutup modal setelah logout
   };
 
   return (

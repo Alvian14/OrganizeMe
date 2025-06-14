@@ -33,18 +33,18 @@ export default function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/settings" element={<AccountInfoPage />} />
-        <Route path="/logout" element={<LogoutModal/>} /> 
+        <Route path="/logout" element={<LogoutModal/>} />
 
         {/* User Dashboard routes */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<TaskDashboard />} />
           <Route path="/mytask" element={<MyTask />} />
-          <Route path="/dashboard/settings" element={<AccountInfoPage />} />  
-          
+          <Route path="/dashboard/settings" element={<AccountInfoPage />} />
+
         </Route>
 
         {/* Admin Dashboard routes */}
-        <Route element={<DashboardAdmin />}>
+        <Route element={<DashboardAdmin/>}>
           <Route path="/admin/user-page-admin" element={<UsersPageAdmin />} />
           <Route path="/admin/task-admin" element={<TaskAdmin />} />
           <Route path="/admin/task-admin/:username" element={<UserTaskDetail />} /> {/* ← Route detail */}
