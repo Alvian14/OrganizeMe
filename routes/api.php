@@ -19,6 +19,7 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
+
 Route::get('/users/{id}/tasks', [TaskController::class, 'getTasksByUserId']);
 
 

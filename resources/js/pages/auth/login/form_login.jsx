@@ -54,7 +54,8 @@ export default function Login() {
 
     useEffect(() => {
         if (token && decodedData && decodedData.success) {
-            navigate("/admin/user-page-admin");
+            const userRole = decodedData.role;
+            navigate(userRole === "admin" ? "/admin/user-page-admin" : "/");
         }
     }, [token, decodedData, navigate]);
 
