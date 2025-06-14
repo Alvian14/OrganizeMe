@@ -30,7 +30,7 @@ export default function LogoutModal({ show, onHide }) {
       <Modal.Header closeButton>
         <Modal.Title>Konfirmasi Logout</Modal.Title>
       </Modal.Header>
-      <Modal.Body>Apakah Anda yakin ingin keluar dari aplikasi?</Modal.Body>
+      <Modal.Body>Apakah Anda yakin ingin keluar?</Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onHide}>
           Batal

@@ -6,6 +6,7 @@ import LogoutModal from "../../../pages/logout";
 
 export default function Navbar() {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
     const handleLogoutClick = () => {
         setShowLogoutModal(true);
@@ -23,6 +24,7 @@ export default function Navbar() {
         >
             <div className="text-center mb-4">
                 <h4 className="fw-bold text-white">OrganizME</h4>
+                <p className="mt-2 mb-0">{userInfo.username}</p>
             </div>
 
             {/* === Menu Section: Tasks & Users === */}
