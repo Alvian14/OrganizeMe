@@ -36,7 +36,7 @@ export default function Login() {
 
     useEffect(() => {
         if (token && decodedData && decodedData.success) {
-            navigate("/admin");
+            navigate("/admin/user-page-admin");
         }
     }, [token, decodedData, navigate]);
 

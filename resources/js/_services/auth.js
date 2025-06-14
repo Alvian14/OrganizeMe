@@ -32,6 +32,21 @@ export const loginUser = async ({username, password}) => {
   return response.data;
 };
 
+export const logout = async ({token}) => {
+  try {
+    const {data} = await API.post("/logout", {token}, {
+      headers: {
+        "Authorization" : `Bearer ${localStorage.getItem("accessToken")}`
+      }
+    })
+    localStorage.removeItem("accessToken");
+    return data
+  } catch (error) {
+    console.log(error);
+    throw error
+  }
+}
+
 
 export const useDecodeToken = () => {
   const token = localStorage.getItem("accessToken");

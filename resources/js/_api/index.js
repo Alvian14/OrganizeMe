@@ -7,3 +7,5 @@ export const API = axios.create({
 })
 
 export const bookImageStorage = `${url}/storage/tasks/`
+
+export default API

@@ -12,8 +12,8 @@ export default function UsersPageAdmin() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const usersData = await getUser(); // ✅ ini akan langsung berupa array
-                setUsers(usersData); // ✅ ini aman
+                const usersData = await getUser();
+                setUsers(usersData); 
             } catch (error) {
                 console.error("Gagal mengambil data user:", error);
             }
