@@ -9,6 +9,7 @@ export default function Register() {
     email: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const navigate = useNavigate();
 
@@ -17,10 +18,37 @@ export default function Register() {
       ...formData,
       [e.target.id]: e.target.value,
     });
+
+    // Clear error saat user mulai ketik di field tersebut
+    if (errors[e.target.id]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[e.target.id];
+        return newErrors;
+      });
+    }
+  };
+
+  // Fungsi validasi sederhana
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.username.trim()) newErrors.username = "Username wajib diisi";
+    if (!formData.email.trim()) newErrors.email = "Email wajib diisi";
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Format email tidak valid";
+    if (!formData.password.trim()) newErrors.password = "Password wajib diisi";
+
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return; // Jangan lanjut submit jika ada error
+    }
+
     try {
       await registerUser(formData);
       setShowSuccessPopup(true);
@@ -38,7 +66,6 @@ export default function Register() {
         padding: "1rem",
       }}
     >
-      {/* Judul OrganizeMe */}
       <div className="mb-3 text-center">
         <h1
           className="fw-bold"
@@ -54,7 +81,6 @@ export default function Register() {
         </h1>
       </div>
 
-      {/* Kotak Form (putih) */}
       <div
         className="rounded-4 shadow p-4"
         style={{
@@ -65,13 +91,13 @@ export default function Register() {
         }}
       >
         <div className="text-center mb-3">
-             <h2 style={{color: "#ff9800"}}>Register</h2>
+          <h2 style={{ color: "#ff9800" }}>Register</h2>
           <p style={{ fontSize: "0.9rem" }}>
             Register to manage your habits efficiently
           </p>
         </div>
-        <br></br>
-        <form onSubmit={handleSubmit}>
+
+        <form onSubmit={handleSubmit} noValidate>
           <div className="mb-3">
             <label htmlFor="username" className="form-label fw-semibold">
               Username
@@ -79,12 +105,16 @@ export default function Register() {
             <input
               type="text"
               id="username"
-              className="form-control form-control-sm"
+              className={`form-control form-control-sm ${errors.username ? "is-invalid" : ""}`}
               value={formData.username}
               onChange={handleChange}
-              required
-              style={{ fontSize: "0.9rem" }}
+              style={{ fontSize: "0.95rem" }}
             />
+            {errors.username && (
+              <div className="invalid-feedback" style={{ fontSize: "0.85rem" }}>
+                {errors.username}
+              </div>
+            )}
           </div>
 
           <div className="mb-3">
@@ -94,12 +124,16 @@ export default function Register() {
             <input
               type="email"
               id="email"
-              className="form-control form-control-sm"
+              className={`form-control form-control-sm ${errors.email ? "is-invalid" : ""}`}
               value={formData.email}
               onChange={handleChange}
-              required
-              style={{ fontSize: "0.9rem" }}
+              style={{ fontSize: "0.95rem" }}
             />
+            {errors.email && (
+              <div className="invalid-feedback" style={{ fontSize: "0.85rem" }}>
+                {errors.email}
+              </div>
+            )}
           </div>
 
           <div className="mb-4">
@@ -109,33 +143,39 @@ export default function Register() {
             <input
               type="password"
               id="password"
-              className="form-control form-control-sm"
+              className={`form-control form-control-sm ${errors.password ? "is-invalid" : ""}`}
               value={formData.password}
               onChange={handleChange}
-              required
-              style={{ fontSize: "0.9rem" }}
+              style={{ fontSize: "0.95rem" }}
             />
+            {errors.password && (
+              <div className="invalid-feedback" style={{ fontSize: "0.85rem" }}>
+                {errors.password}
+              </div>
+            )}
           </div>
-            <br></br>
+
           <button
             type="submit"
             className="btn btn-sm w-100 text-white"
             style={{
               backgroundColor: "#ff9800",
               border: "none",
-              fontSize: "0.9rem",
+              fontSize: "1rem",
             }}
           >
             Daftar
           </button>
 
           <p className="mt-3 text-center text-muted" style={{ fontSize: "0.85rem" }}>
-            Sudah punya akun? <Link to="/" className="text-decoration-underline">Login di sini</Link>
+            Sudah punya akun?{" "}
+            <Link to="/" className="text-decoration-underline">
+              Login di sini
+            </Link>
           </p>
         </form>
       </div>
 
-      {/* Pop-up Sukses */}
       {showSuccessPopup && (
         <div
           style={{
