@@ -4,24 +4,21 @@ import { useParams } from "react-router-dom";
 import { BsCardChecklist, BsInfoCircle } from "react-icons/bs";
 import { getTasksByUserId } from "../../_services/tasks";
 
-
 export default function UserTaskDetail() {
   const { id } = useParams();
   const [tasks, setTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
-  // Fetch tasks dari API
-   useEffect(() => {
+  useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const data = await getTasksByUserId(id); // pake service
+        const data = await getTasksByUserId(id);
         setTasks(data);
       } catch (error) {
         console.error("Gagal mengambil data task:", error);
       }
     };
-
     fetchTasks();
   }, [id]);
 
@@ -35,16 +32,38 @@ export default function UserTaskDetail() {
     setSelectedTask(null);
   };
 
+  const mapStatusIdToText = (id) => {
+    switch (id) {
+      case 1:
+        return "To Do";
+      case 2:
+        return "Doing";
+      case 3:
+        return "Done";
+      default:
+        return "Unknown";
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "To Do":
+        return "#6c757d"; // abu
+      case "Doing":
+        return "#ffc107"; // kuning
+      case "Done":
+        return "#198754"; // hijau
+    }
+  };
+
   const renderStatus = (status) => {
     switch (status) {
       case "To Do":
-        return <Badge bg="secondary">To Do</Badge>;
+        return <Badge bg="secondary" className="px-3 py-1 rounded-pill">Not Started</Badge>;
       case "Doing":
-        return <Badge bg="warning" text="dark">Doing</Badge>;
+        return <Badge bg="warning" text="dark" className="px-3 py-1 rounded-pill">In Progress</Badge>;
       case "Done":
-        return <Badge bg="success">Done</Badge>;
-      default:
-        return <Badge bg="light">Unknown</Badge>;
+        return <Badge bg="success" className="px-3 py-1 rounded-pill">Completed</Badge>;
     }
   };
 
@@ -65,17 +84,21 @@ export default function UserTaskDetail() {
                 <Col md={6} lg={4} key={task.id}>
                   <Card
                     onClick={() => handleTaskClick(task)}
-                    className="shadow-sm rounded-4 h-100 border border-light cursor-pointer"
-                    style={{ cursor: "pointer", transition: "all 0.3s ease-in-out" }}
+                    className="shadow rounded-4 h-100 border-0 bg-light"
+                    style={{
+                      cursor: "pointer",
+                      transition: "all 0.3s ease-in-out",
+                      borderLeft: `5px solid ${getStatusColor(mapStatusIdToText(task.status_id))}`,
+                    }}
                   >
                     <Card.Body>
-                      <h6 className="fw-semibold">{task.title}</h6>
-                      <p className="text-muted small mb-2">
-                        {task.description.length > 50
-                          ? task.description.slice(0, 50) + "..."
+                      <h6 className="fw-bold text-dark">{task.title}</h6>
+                      <p className="text-secondary small mb-3">
+                        {task.description.length > 60
+                          ? task.description.slice(0, 60) + "..."
                           : task.description}
                       </p>
-                      {renderStatus(task.status)}
+                      {renderStatus(mapStatusIdToText(task.status_id))}
                     </Card.Body>
                   </Card>
                 </Col>
@@ -99,7 +122,7 @@ export default function UserTaskDetail() {
             <>
               <h5 className="fw-bold">{selectedTask.title}</h5>
               <p className="text-muted">{selectedTask.description}</p>
-              <div>Status: {renderStatus(selectedTask.status)}</div>
+              <div>Status: {renderStatus(mapStatusIdToText(selectedTask.status_id))}</div>
             </>
           )}
         </Modal.Body>
