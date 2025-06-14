@@ -16,6 +16,16 @@ export const deleteUser = async (id) => {
   }
 }
 
+export const showUser = async (id) => {
+  try {
+    const {data} = await API.get(`/users/${id}`)
+    return data.data
+  } catch (error) {
+    console.log(error);
+    throw error
+  }
+}
+
 // kode untuk memperbarui data
 export const updateUserRole = async (id, data) => {
   const response = await API.put(`/users/${id}`, data);

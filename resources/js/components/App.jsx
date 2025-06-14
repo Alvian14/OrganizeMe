@@ -23,6 +23,7 @@ import TaskAdmin from '../pages/admin/TaskAdmin';
 import UserTaskDetail from '../pages/admin/UserTaskDetail'; // ← Tambahkan ini
 import AccountInfoPageAdmin from '../pages/admin/AccountInfoPageAdmin';
 import LogoutModal from '../pages/logout';
+import ForgotPassword from '../pages/auth/forgot-password/forgot_password';
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/settings" element={<AccountInfoPage />} />
         <Route path="/logout" element={<LogoutModal/>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* User Dashboard routes */}
         <Route element={<DashboardLayout />}>
@@ -47,7 +49,7 @@ export default function App() {
         <Route element={<DashboardAdmin/>}>
           <Route path="/admin/user-page-admin" element={<UsersPageAdmin />} />
           <Route path="/admin/task-admin" element={<TaskAdmin />} />
-          <Route path="/admin/task-admin/:username" element={<UserTaskDetail />} /> {/* ← Route detail */}
+          <Route path="/admin/task-admin/:id" element={<UserTaskDetail />} />
           <Route path="/admin/settings" element={<AccountInfoPageAdmin />} />
         </Route>
       </Routes>

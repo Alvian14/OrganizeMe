@@ -1,34 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Badge, Modal, Button, Row, Col } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { BsCardChecklist, BsInfoCircle } from "react-icons/bs";
+import { getTasksByUserId } from "../../_services/tasks";
+
 
 export default function UserTaskDetail() {
-  const { username } = useParams();
-
-  const tasks = [
-    {
-      id: 1,
-      title: "Login Page",
-      status: "To Do",
-      description: "Buat halaman login dengan validasi form.",
-    },
-    {
-      id: 2,
-      title: "Dashboard Layout",
-      status: "Doing",
-      description: "Susun tampilan layout admin dan user secara dinamis.",
-    },
-    {
-      id: 3,
-      title: "API Integration",
-      status: "Done",
-      description: "Hubungkan form dengan endpoint backend dan testing API.",
-    },
-  ];
-
+  const { id } = useParams();
+  const [tasks, setTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+
+  // Fetch tasks dari API
+   useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const data = await getTasksByUserId(id); // pake service
+        setTasks(data);
+      } catch (error) {
+        console.error("Gagal mengambil data task:", error);
+      }
+    };
+
+    fetchTasks();
+  }, [id]);
 
   const handleTaskClick = (task) => {
     setSelectedTask(task);
@@ -60,30 +55,34 @@ export default function UserTaskDetail() {
           <div className="d-flex align-items-center justify-content-between flex-wrap mb-4">
             <div className="d-flex align-items-center gap-2 mb-3 mb-md-0">
               <BsCardChecklist size={24} className="text-primary" />
-              <h4 className="fw-bold mb-0">Task Detail for <span className="text-info">{username}</span></h4>
+              <h4 className="fw-bold mb-0">Task Detail</h4>
             </div>
           </div>
 
           <Row className="g-3">
-            {tasks.map((task) => (
-              <Col md={6} lg={4} key={task.id}>
-                <Card
-                  onClick={() => handleTaskClick(task)}
-                  className="shadow-sm rounded-4 h-100 border border-light cursor-pointer"
-                  style={{ cursor: "pointer", transition: "all 0.3s ease-in-out" }}
-                >
-                  <Card.Body>
-                    <h6 className="fw-semibold">{task.title}</h6>
-                    <p className="text-muted small mb-2">
-                      {task.description.length > 50
-                        ? task.description.slice(0, 50) + "..."
-                        : task.description}
-                    </p>
-                    {renderStatus(task.status)}
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
+            {tasks.length > 0 ? (
+              tasks.map((task) => (
+                <Col md={6} lg={4} key={task.id}>
+                  <Card
+                    onClick={() => handleTaskClick(task)}
+                    className="shadow-sm rounded-4 h-100 border border-light cursor-pointer"
+                    style={{ cursor: "pointer", transition: "all 0.3s ease-in-out" }}
+                  >
+                    <Card.Body>
+                      <h6 className="fw-semibold">{task.title}</h6>
+                      <p className="text-muted small mb-2">
+                        {task.description.length > 50
+                          ? task.description.slice(0, 50) + "..."
+                          : task.description}
+                      </p>
+                      {renderStatus(task.status)}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))
+            ) : (
+              <p className="text-muted">Tidak ada task ditemukan.</p>
+            )}
           </Row>
         </Card.Body>
       </Card>

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Card, Form, Button, Row, Col, Alert } from "react-bootstrap";
-import { getUser } from "../../_services/auth";
+import { getUser, showUser } from "../../_services/auth";
+import { useParams } from "react-router-dom";
 
 export default function AccountInfoPageAdmin() {
+    const {id} = useParams();
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     const [users, setUsers] = useState([]);
     const [activeTab, setActiveTab] = useState("profile");
     const [formData, setFormData] = useState({
@@ -14,9 +17,7 @@ export default function AccountInfoPageAdmin() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const [usersData] = await Promise.all([
-                getUser()
-            ]);
+            const [usersData]  = await showUser(id);
             setUsers(usersData);
             setFormData({
                 username: usersData.username,
@@ -26,7 +27,7 @@ export default function AccountInfoPageAdmin() {
             })
         };
         fetchData();
-    });
+    }, [id]);
 
 
 
@@ -78,7 +79,7 @@ export default function AccountInfoPageAdmin() {
                                             type="text"
                                             placeholder="Enter username"
                                             name="username"
-                                            value={formData.username}
+                                            value={userInfo.username}
                                             onChange= ""
                                             required
                                         />
@@ -92,7 +93,7 @@ export default function AccountInfoPageAdmin() {
                                             type="email"
                                             placeholder="Enter email"
                                             name="email"
-                                              value=""
+                                              value={userInfo.email}
                                               onChange=""
                                             required
                                         />
@@ -108,7 +109,7 @@ export default function AccountInfoPageAdmin() {
                                 <Form.Control
                                     type="file"
                                     name="profilePicture"
-                                    onChange=""
+                                    onChange={userInfo.image}
                                     accept="image/*"
                                 />
                             </Form.Group>

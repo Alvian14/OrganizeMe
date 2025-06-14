@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\User;
 use Dotenv\Util\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Request as FacadesRequest;
@@ -11,7 +12,8 @@ use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $task = Task::with('user', 'category', 'status', 'priority')->get();
 
         if ($task->isEmpty()) {
@@ -29,7 +31,8 @@ class TaskController extends Controller
         ], 200);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         //validator
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:100',
@@ -73,7 +76,8 @@ class TaskController extends Controller
         ], 201);
     }
 
-    public function show(string $id) {
+    public function show(string $id)
+    {
         $task = Task::with('user', 'category', 'status', 'priority')->find($id);
 
         // respone untuk data tidak ditemukan
@@ -89,15 +93,16 @@ class TaskController extends Controller
             "success" => true,
             "message" => "Get detail resource",
             "data" => $task
-         ], 200);
+        ], 200);
     }
 
 
-    public function update(string $id, Request $request)  {
+    public function update(string $id, Request $request)
+    {
         $task = Task::find($id);
         if (!$task) {
             return response()->json([
-                 "success" => false,
+                "success" => false,
                 "message" => "Resource not found",
             ], 404);
         }
@@ -151,11 +156,12 @@ class TaskController extends Controller
             "success" => true,
             "message" => "Resource updated successfully!.",
             "data" => $task
-        ],200);
+        ], 200);
     }
 
     // diguanakan untuk menghapus data
-    public function destroy(string $id) {
+    public function destroy(string $id)
+    {
         $task = Task::find($id);
 
         if (!$task) {
@@ -174,7 +180,27 @@ class TaskController extends Controller
         return response()->json([
             "success" => true,
             "message" => "Delete resource successfully!.",
-        ],200);
+        ], 200);
+    }
 
+
+    // TaskController.php
+    public function getTasksByUserId($id)
+    {
+        $user = User::with('tasks')->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tasks retrieved successfully',
+            'data' => $user->tasks
+        ]);
     }
 }

@@ -13,7 +13,7 @@ export default function UsersPageAdmin() {
         const fetchData = async () => {
             try {
                 const usersData = await getUser();
-                setUsers(usersData); 
+                setUsers(usersData);
             } catch (error) {
                 console.error("Gagal mengambil data user:", error);
             }
@@ -68,9 +68,9 @@ export default function UsersPageAdmin() {
                         <thead className="table-dark">
                             <tr>
                                 <th className="text-dark">#</th>
-                                <th className="text-dark">Image</th>
                                 <th className="text-dark">Username</th>
                                 <th className="text-dark">Email</th>
+                                <th className="text-dark">Image</th>
                                 <th className="text-dark">Role</th>
                                 <th className="text-dark">Actions</th>
                             </tr>
