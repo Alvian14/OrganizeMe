@@ -10,10 +10,6 @@ export default function Sidebar() {
         setShowLogoutModal(true);
     };
 
-    // const handleCloseModal = () => {
-    //     setShowLogoutModal(false);
-    // };
-
     return (
         <>
             <div
@@ -65,22 +61,6 @@ export default function Sidebar() {
                             <i className="bi bi-list-task me-2" /> My Task
                         </NavLink>
                     </li>
-
-                    {/* <li className="nav-item mb-2">
-                    <NavLink
-                        to="/dashboard/task-categories"
-                        className={({ isActive }) =>
-                            `nav-link d-flex align-items-center ${
-                                isActive
-                                    ? "bg-white text-dark rounded p-2"
-                                    : "text-white"
-                            }`
-                        }
-                    >
-                        <i className="bi bi-layout-text-sidebar-reverse me-2" /> Task Categories
-                    </NavLink>
-                </li> */}
-
                     <li className="nav-item mb-2">
                         <NavLink
                             to="/dashboard/settings"
