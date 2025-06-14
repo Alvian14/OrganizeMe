@@ -92,7 +92,6 @@ export default function Login() {
                     </p>
                 </div>
 
-                {/* Notifikasi Error Login */}
                 {errorMessage && (
                     <div className="alert alert-danger py-2 px-3" role="alert" style={{ fontSize: "0.9rem" }}>
                         {errorMessage}
