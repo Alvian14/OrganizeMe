@@ -32,39 +32,50 @@ export default function UserTaskDetail() {
     setSelectedTask(null);
   };
 
-  const mapStatusIdToText = (id) => {
+  const getStatusLabel = (id) => {
     switch (id) {
       case 1:
-        return "To Do";
+        return "Not Started";
       case 2:
-        return "Doing";
+        return "In Progress";
       case 3:
-        return "Done";
+        return "Completed";
       default:
         return "Unknown";
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "To Do":
-        return "#6c757d"; // abu
-      case "Doing":
+  const getStatusColor = (id) => {
+    switch (id) {
+      case 1:
+        return "#6c757d"; // abu-abu
+      case 2:
         return "#ffc107"; // kuning
-      case "Done":
+      case 3:
         return "#198754"; // hijau
+      default:
+        return "#dee2e6"; // abu muda
     }
   };
 
-  const renderStatus = (status) => {
-    switch (status) {
-      case "To Do":
-        return <Badge bg="secondary" className="px-3 py-1 rounded-pill">Not Started</Badge>;
-      case "Doing":
-        return <Badge bg="warning" text="dark" className="px-3 py-1 rounded-pill">In Progress</Badge>;
-      case "Done":
-        return <Badge bg="success" className="px-3 py-1 rounded-pill">Completed</Badge>;
+  const renderStatus = (id) => {
+    const label = getStatusLabel(id);
+    switch (id) {
+      case 1:
+        return <Badge bg="secondary" className="px-3 py-1 rounded-pill">{label}</Badge>;
+      case 2:
+        return <Badge bg="warning" text="dark" className="px-3 py-1 rounded-pill">{label}</Badge>;
+      case 3:
+        return <Badge bg="success" className="px-3 py-1 rounded-pill">{label}</Badge>;
+      default:
+        return <Badge bg="light" className="px-3 py-1 rounded-pill">{label}</Badge>;
     }
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateStr).toLocaleDateString("id-ID", options);
   };
 
   return (
@@ -88,17 +99,20 @@ export default function UserTaskDetail() {
                     style={{
                       cursor: "pointer",
                       transition: "all 0.3s ease-in-out",
-                      borderLeft: `5px solid ${getStatusColor(mapStatusIdToText(task.status_id))}`,
+                      borderLeft: `5px solid ${getStatusColor(task.status_id)}`,
                     }}
                   >
                     <Card.Body>
                       <h6 className="fw-bold text-dark">{task.title}</h6>
-                      <p className="text-secondary small mb-3">
+                      <p className="text-secondary small mb-2">
                         {task.description.length > 60
                           ? task.description.slice(0, 60) + "..."
                           : task.description}
                       </p>
-                      {renderStatus(mapStatusIdToText(task.status_id))}
+                      <p className="text-muted small mb-2">
+                        Deadline: {formatDate(task.deadline)}
+                      </p>
+                      {renderStatus(task.status_id)}
                     </Card.Body>
                   </Card>
                 </Col>
@@ -121,8 +135,11 @@ export default function UserTaskDetail() {
           {selectedTask && (
             <>
               <h5 className="fw-bold">{selectedTask.title}</h5>
-              <p className="text-muted">{selectedTask.description}</p>
-              <div>Status: {renderStatus(mapStatusIdToText(selectedTask.status_id))}</div>
+              <p className="text-muted">Description : {selectedTask.description}</p>
+              <p className="text-muted mb-2">
+                Deadline: {formatDate(selectedTask.deadline)}
+              </p>
+              <div>Status: {renderStatus(selectedTask.status_id)}</div>
             </>
           )}
         </Modal.Body>
