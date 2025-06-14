@@ -3,8 +3,12 @@ import { NavLink } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import LogoutModal from "../../pages/logout";
 
+
 export default function Sidebar() {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+
 
     const handleLogoutClick = () => {
         setShowLogoutModal(true);
@@ -26,8 +30,8 @@ export default function Sidebar() {
                         className="rounded-circle"
                         alt="avatar"
                     />
-                    <h5 className="mt-2 mb-0">OrMe</h5>
-                    <small>OrMe@gmail.com</small>
+                    <h5 className="mt-2 mb-0">{userInfo.username}</h5>
+                    <small>{userInfo.email}</small>
                 </div>
 
                 <ul className="nav flex-column">
