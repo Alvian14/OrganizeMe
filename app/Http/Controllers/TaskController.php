@@ -103,81 +103,84 @@ class TaskController extends Controller
 
     public function update(string $id, Request $request)
     {
-        $user = User::find($id);
+        $task = Task::find($id);
 
-        if (!$user) {
+        if (!$task) {
             return response()->json([
                 "success" => false,
-                "message" => "User not found!",
+                "message" => "Task not found!",
             ], 404);
         }
 
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'username' => 'required|string|max:50',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'image' => 'nullable|image|mimes:jpg,jpeg,png',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'priority_id' => 'required|exists:priority_levels,id',
+            'status_id' => 'required|exists:task_statuses,id',
+            'deadline' => 'required|date|after:now',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => $validator->errors()
+                'errors' => $validator->errors()
             ], 422);
         }
 
         // Data yang akan diupdate
         $data = [
-            'username' => $request->username,
-            'email' => $request->email,
+            'title' => $request->title,
+            'description' => $request->description,
+            'priority_id' => $request->priority_id,
+            'status_id' => $request->status_id,
+            'deadline' => $request->deadline,
         ];
 
         // Jika ada file image yang diupload
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $image->store('users', 'public');
+            $image->store('tasks', 'public');
 
             // Hapus gambar lama jika ada
-            if ($user->image) {
-                Storage::disk('public')->delete('users/' . $user->image);
+            if ($task->image) {
+                Storage::disk('public')->delete('tasks/' . $task->image);
             }
 
             $data['image'] = $image->hashName();
         }
 
         // Update ke database
-        $user->update($data);
+        $task->update($data);
 
         return response()->json([
             "success" => true,
-            "message" => "User updated successfully!",
-            "data" => $user
+            "message" => "Task updated successfully!",
+            "data" => $task
         ], 200);
     }
 
 
     // diguanakan untuk menghapus data
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $task = Task::find($id);
-
         if (!$task) {
-            return response()->json([
-                "success" => false,
-                "message" => "Resource not found.",
-                "data" => $task
-            ], 200);
+            return response()->json(['message' => 'Task not found'], 404);
         }
 
-        if ($task->image) {
-            Storage::disk('public')->delete('tasks/' . $task->image);
+        // Cek apakah ada kolom 'image' dan nilainya tidak null/kosong
+        if (!empty($task->image)) {
+            $imagePath = public_path('uploads/' . $task->image);
+            if (file_exists($imagePath)) {
+                @unlink($imagePath);
+            }
+            // Jika file tidak ada, lanjut saja tanpa error
         }
 
         $task->delete();
-        return response()->json([
-            "success" => true,
-            "message" => "Delete resource successfully!.",
-        ], 200);
+        return response()->json(['message' => 'Task deleted'], 200);
     }
 
 
@@ -198,6 +201,39 @@ class TaskController extends Controller
             'success' => true,
             'message' => 'Tasks retrieved successfully',
             'data' => $user->tasks
+        ]);
+    }
+
+    public function getTasksByUserIdFull($id)
+    {
+        $tasks = Task::select(
+            'tasks.id',
+            'tasks.title',
+            'tasks.description',
+            'tasks.deadline',
+            'tasks.created_at',
+            'tasks.priority_id',
+            'tasks.status_id',
+            'priority_levels.name as priority_name',
+            'task_statuses.name as status_name'
+        )
+        ->leftJoin('priority_levels', 'tasks.priority_id', '=', 'priority_levels.id')
+        ->leftJoin('task_statuses', 'tasks.status_id', '=', 'task_statuses.id')
+        ->where('tasks.user_id', $id)
+        ->get();
+
+        if (!$tasks) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tasks retrieved successfully',
+            'data' => $tasks
         ]);
     }
 }
