@@ -20,7 +20,7 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::put('/update-role/{id}', [AuthController::class, 'updateRole']);
 
-
+Route::post('/tasks', [TaskController::class, 'store']);
 
 Route::get('/users/{id}/tasks', [TaskController::class, 'getTasksByUserId']);
 

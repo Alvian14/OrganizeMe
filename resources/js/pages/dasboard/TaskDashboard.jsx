@@ -21,6 +21,16 @@ const TaskDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  const [formData, setFormData] = useState({
+    title : null,
+    date : null,
+    priority : 1,
+    description : null,
+    image : null,
+    status: 1,
+    category: 1
+  })
+
   const handleShow = () => setShowModal(true);
   const handleClose = () => {
     setShowModal(false);
@@ -30,9 +40,54 @@ const TaskDashboard = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedImage(URL.createObjectURL(file));
+      setSelectedImage(file);
     }
   };
+
+
+  const handleSubmit =async (e) => {
+    e.preventDefault();
+
+    if (!formData.category || formData.date === null || !formData.title || !formData.description) {
+      return alert( "Please fill all the fields" );
+    } 
+
+
+    const user = JSON.parse(localStorage.getItem("userInfo"));
+    const payload = new FormData();
+    console.log(user.data);
+    payload.append("title", formData.title);
+    payload.append('deadline', formData.date);
+    payload.append('priority_id', formData.priority);
+    payload.append('description', formData.description);
+    payload.append('category_id', formData.category);
+    payload.append('status_id', formData.status);
+    payload.append('user_id', user.id);
+    
+    if (selectedImage) payload.append('image', selectedImage);
+
+    try {
+      
+      const response = await fetch('http://localhost:8000/api/tasks', {
+        method: 'POST',
+        body:payload,
+      });
+
+      if (!response.ok) throw new Error('Submission Failed');
+
+      const data = await response.json();
+      alert("Task Saved", data);
+      handleClose();
+    } catch (error) {
+      console.log(error);
+      alert("Error Saving task");
+    }
+
+    
+
+
+    
+  }
 
   return (
     <Container fluid className="bg-light p-4" style={{ minHeight: "100vh" }}>
@@ -196,29 +251,101 @@ const TaskDashboard = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+          <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Task Title</Form.Label>
-              <Form.Control type="text" placeholder="Enter task title" />
+              <Form.Control 
+              type="text" 
+              placeholder="Enter task title" 
+              name="title" 
+              value={formData.title}
+              onChange={e => setFormData({...formData, title: e.target.value})}/>
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Due Date</Form.Label>
-              <Form.Control type="date" />
+              <Form.Control 
+              type="date" 
+              name="date"
+              value={formData.date}
+              onChange={e => setFormData({...formData, date:e.target.value})}/>
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Priority</Form.Label>
               <div>
-                <Form.Check inline label="Low" name="priority" type="radio" id="low" />
-                <Form.Check inline label="Medium" name="priority" type="radio" id="medium" />
-                <Form.Check inline label="High" name="priority" type="radio" id="high" />
+                <Form.Check 
+                inline 
+                label="Low" 
+                name="priority" 
+                type="radio" 
+                id="low"
+                value={1} 
+                checked={formData.priority === 1} 
+                onChange={e => setFormData({...formData, priority: Number(e.target.value)})}/>                
+                <Form.Check 
+                inline 
+                label="Medium" 
+                name="priority" 
+                type="radio" 
+                id="medium" 
+                value={2}
+                checked={formData.priority === 2} 
+                onChange={e => setFormData({...formData, priority: Number(e.target.value)})}/>
+                <Form.Check 
+                inline 
+                label="High" 
+                name="priority" 
+                type="radio" 
+                id="high"
+                value={3} 
+                checked={formData.priority === 3} 
+                onChange={e => setFormData({...formData, priority: Number(e.target.value)})}/>
+              </div>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Category</Form.Label>
+              <div>
+                <Form.Check 
+                inline 
+                value={1}
+                label="Daily" 
+                name="category" 
+                type="radio" 
+                id="daily" 
+                checked={formData.category === 1} 
+                onChange={e => setFormData({...formData, category: Number(e.target.value)})}/>                
+                <Form.Check 
+                inline 
+                value={2}
+                label="Weekly" 
+                name="category" 
+                type="radio" 
+                id="weekly" 
+                checked={formData.category === 2} 
+                onChange={e => setFormData({...formData, category: Number(e.target.value)})}/>
+                <Form.Check 
+                inline 
+                value={3}
+                label="Monthly" 
+                name="category" 
+                type="radio" 
+                id="monthly" 
+                checked={formData.category === 3} 
+                onChange={e => setFormData({...formData, category: Number(e.target.value)})}/>
               </div>
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
-              <Form.Control as="textarea" rows={3} placeholder="Write details..." />
+              <Form.Control 
+              as="textarea" 
+              name="description" 
+              rows={3} 
+              placeholder="Write details..." 
+              value={formData.description}
+              onChange={e => setFormData({...formData, description: e.target.value})}/>
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -229,23 +356,23 @@ const TaskDashboard = () => {
             {selectedImage && (
               <div className="text-center mb-3">
                 <img
-                  src={selectedImage}
+                  src={URL.createObjectURL(selectedImage)}
                   alt="Preview"
                   className="img-fluid rounded shadow"
                   style={{ maxHeight: "200px", objectFit: "cover" }}
                 />
               </div>
             )}
+            <div>
+              <Button variant="secondary" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit" onClick={handleClose}>
+                Save Task
+              </Button>
+            </div>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleClose}>
-            Save Task
-          </Button>
-        </Modal.Footer>
       </Modal>
     </Container>
   );

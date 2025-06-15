@@ -37,9 +37,9 @@ class TaskController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:100',
             'description' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,jpg,png',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png',
             'deadline' => 'required|date|after:now',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'required|integer',
             'category_id' => 'required|exists:categories,id',
             'status_id' => 'required|exists:task_statuses,id',
             'priority_id' => 'required|exists:priority_levels,id',
@@ -52,15 +52,19 @@ class TaskController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
+        $imageName = null;
         //upload image
-        $image = $request->file('image');
-        $image->store('tasks', 'public');
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $image->store('tasks', 'public');
+            $imageName = $image->hashName();
+        };
+
 
         $task = Task::create([
             'title' => $request->title,
             'description' => $request->description,
-            'image' => $image->hashName(),
+            'image' => $imageName,
             'deadline' => $request->deadline,
             'user_id' => $request->user_id,
             'category_id' => $request->category_id,
