@@ -159,27 +159,24 @@ class TaskController extends Controller
 
 
     // diguanakan untuk menghapus data
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $task = Task::find($id);
-
         if (!$task) {
-            return response()->json([
-                "success" => false,
-                "message" => "Resource not found.",
-                "data" => $task
-            ], 200);
+            return response()->json(['message' => 'Task not found'], 404);
         }
 
-        if ($task->image) {
-            Storage::disk('public')->delete('tasks/' . $task->image);
+        // Cek apakah ada kolom 'image' dan nilainya tidak null/kosong
+        if (!empty($task->image)) {
+            $imagePath = public_path('uploads/' . $task->image);
+            if (file_exists($imagePath)) {
+                @unlink($imagePath);
+            }
+            // Jika file tidak ada, lanjut saja tanpa error
         }
 
         $task->delete();
-        return response()->json([
-            "success" => true,
-            "message" => "Delete resource successfully!.",
-        ], 200);
+        return response()->json(['message' => 'Task deleted'], 200);
     }
 
 

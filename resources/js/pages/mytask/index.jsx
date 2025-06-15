@@ -9,7 +9,7 @@ import {
     Alert,
 } from "react-bootstrap";
 import { Calendar, Trash, Pencil, ImageFill } from "react-bootstrap-icons";
-import { getTasksByUserIdFull, updateTasks } from "../../_services/tasks";
+import { getTasksByUserIdFull, updateTasks, deleteTask } from "../../_services/tasks";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const MyTaskPage = () => {
@@ -22,6 +22,8 @@ const MyTaskPage = () => {
     const [imageFile, setImageFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState({ show: false, message: "", type: "" });
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [formErrors, setFormErrors] = useState({}); // Tambah state untuk error validasi
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -101,6 +103,7 @@ const MyTaskPage = () => {
         }
 
         setIsLoading(true);
+        setFormErrors({}); // Reset error validasi
 
         try {
             // Siapkan data yang akan dikirim ke server
@@ -120,10 +123,8 @@ const MyTaskPage = () => {
                 });
                 formData.append("image", imageFile);
 
-                // Panggil service dengan FormData
                 const updatedTask = await updateTasks(editData.id, formData);
 
-                // Update state tasks dengan data yang sudah diupdate
                 setTasks((prevTasks) =>
                     prevTasks.map((task) =>
                         task.id === editData.id
@@ -135,7 +136,6 @@ const MyTaskPage = () => {
                 // Panggil service dengan JSON data
                 const updatedTask = await updateTasks(editData.id, taskData);
 
-                // Update state tasks dengan data yang sudah diupdate
                 setTasks((prevTasks) =>
                     prevTasks.map((task) =>
                         task.id === editData.id
@@ -147,7 +147,6 @@ const MyTaskPage = () => {
 
             // Update selectedTask jika sedang dipilih
             if (selectedTask && selectedTask.id === editData.id) {
-                // Refresh data dari server atau update manual
                 const refreshedTasks = await getTasksByUserIdFull(
                     JSON.parse(localStorage.getItem("userInfo")).id
                 );
@@ -161,9 +160,14 @@ const MyTaskPage = () => {
             showAlert("Task berhasil diupdate!", "success");
             handleClose();
         } catch (error) {
-            console.error("Error updating task:", error);
-            // Tampilkan error yang lebih detail
-            if (error.response) {
+            // Tangani error validasi 422
+            if (error.response && error.response.status === 422) {
+                setFormErrors(error.response.data.errors || {});
+                showAlert(
+                    error.response.data.message || "Validasi gagal. Periksa input Anda.",
+                    "danger"
+                );
+            } else if (error.response) {
                 showAlert(
                     `Error ${error.response.status}: ${
                         error.response.data.message || "Gagal mengupdate task"
@@ -178,6 +182,26 @@ const MyTaskPage = () => {
             }
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleDeleteClick = () => {
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!selectedTask) return;
+        setIsLoading(true);
+        try {
+            await deleteTask(selectedTask.id);
+            setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
+            setSelectedTask(null);
+            showAlert("Task berhasil dihapus!", "success");
+        } catch (error) {
+            showAlert("Gagal menghapus task.", "danger");
+        } finally {
+            setIsLoading(false);
+            setShowDeleteModal(false);
         }
     };
 
@@ -390,6 +414,8 @@ const MyTaskPage = () => {
                                                     width: 42,
                                                     height: 42,
                                                 }}
+                                                onClick={handleDeleteClick}
+                                                disabled={isLoading}
                                             >
                                                 <Trash size={18} />
                                             </Button>
@@ -432,6 +458,18 @@ const MyTaskPage = () => {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {/* Tampilkan error validasi jika ada */}
+                    {Object.keys(formErrors).length > 0 && (
+                        <div className="alert alert-danger py-2 px-3" style={{ fontSize: "0.95rem" }}>
+                            <ul className="mb-0">
+                                {Object.entries(formErrors).map(([field, msgs]) =>
+                                    msgs.map((msg, idx) => (
+                                        <li key={field + idx}>{msg}</li>
+                                    ))
+                                )}
+                            </ul>
+                        </div>
+                    )}
                     <Form>
                         <Form.Group className="mb-3">
                             <Form.Label>
@@ -621,6 +659,24 @@ const MyTaskPage = () => {
                         disabled={isLoading}
                     >
                         {isLoading ? "Updating..." : "Save Task"}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Modal Konfirmasi Delete */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Konfirmasi Hapus</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Apakah Anda yakin ingin menghapus task ini?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={isLoading}>
+                        Batal
+                    </Button>
+                    <Button variant="danger" onClick={handleDeleteConfirm} disabled={isLoading}>
+                        {isLoading ? "Menghapus..." : "Ya, Hapus"}
                     </Button>
                 </Modal.Footer>
             </Modal>
