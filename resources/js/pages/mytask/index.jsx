@@ -1,105 +1,631 @@
-import React from "react";
-import { Card, Button } from "react-bootstrap";
-import { Folder, Calendar, Trash, Pencil } from "react-bootstrap-icons";
+import React, { useEffect, useState } from "react";
+import {
+    Card,
+    Button,
+    Modal,
+    Form,
+    Badge,
+    Image,
+    Alert,
+} from "react-bootstrap";
+import { Calendar, Trash, Pencil, ImageFill } from "react-bootstrap-icons";
+import { getTasksByUserIdFull, updateTasks } from "../../_services/tasks";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const MyTaskPage = () => {
-  return (
-    <div className="d-flex flex-column flex-md-row min-vh-100 bg-light">
-      <div className="flex-grow-1 p-4">
-        {/* Header: Search & Icons */}
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-          <input
-            type="text"
-            className="form-control w-100 w-md-50"
-            placeholder="Search your task here..."
-            style={{ maxWidth: "400px" }}
-          />
-          <div className="d-flex align-items-center gap-3">
-            <Button
-              variant="outline-secondary"
-              className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
-              style={{ width: 42, height: 42 }}
-              title="Calendar"
-            >
-              <Calendar size={20} />
-            </Button>
-            <div className="text-end">
-              <strong className="d-block">Tuesday</strong>
-              <small className="text-muted">20/06/2023</small>
+    const [tasks, setTasks] = useState([]);
+    const [selectedStatus, setSelectedStatus] = useState("All");
+    const [selectedTask, setSelectedTask] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [editData, setEditData] = useState({});
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [alert, setAlert] = useState({ show: false, message: "", type: "" });
+
+    useEffect(() => {
+        const fetchTasks = async () => {
+            const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+            if (userInfo?.id) {
+                try {
+                    const data = await getTasksByUserIdFull(userInfo.id);
+                    // console.log(data);
+                    setTasks(data);
+                } catch (error) {
+                    console.error("Gagal mengambil task:", error);
+                }
+            }
+        };
+        fetchTasks();
+    }, []);
+
+    const showAlert = (message, type = "info") => {
+        setAlert({ show: true, message, type });
+        setTimeout(() => {
+            setAlert({ show: false, message: "", type: "" });
+        }, 3000);
+    };
+
+    const handleShowModal = (task) => {
+        // Konversi priority name ke priority_id
+        let priorityId = 1; // Default Low
+        if (task.priority_name === "Medium") priorityId = 2;
+        if (task.priority_name === "Hight" || task.priority_name === "High")
+            priorityId = 3;
+
+        // Konversi status name ke status_id
+        let statusId = 1;
+        if (task.status_name === "In Progress") statusId = 2;
+        if (task.status_name === "Completed") statusId = 3;
+
+        setEditData({
+            ...task,
+            deadline: task.deadline ? task.deadline.split(" ")[0] : "",
+            priority_id: priorityId,
+            status_id: statusId,
+        });
+        setSelectedImage(task.image || null);
+        setImageFile(null);
+        setShowModal(true);
+    };
+
+    const handleClose = () => {
+        setShowModal(false);
+        setEditData({});
+        setSelectedImage(null);
+        setImageFile(null);
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setSelectedImage(URL.createObjectURL(file));
+        }
+    };
+
+    const updateTask = async () => {
+        // Validasi: semua field wajib diisi
+        if (
+            !editData.title ||
+            !editData.description ||
+            !editData.deadline ||
+            !editData.priority_id ||
+            !editData.status_id
+        ) {
+            showAlert(
+                "Harap lengkapi semua field yang wajib diisi!",
+                "warning"
+            );
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            // Siapkan data yang akan dikirim ke server
+            const taskData = {
+                title: editData.title,
+                description: editData.description,
+                deadline: editData.deadline,
+                priority_id: editData.priority_id,
+                status_id: editData.status_id,
+            };
+
+            // Jika ada file gambar, buat FormData
+            if (imageFile) {
+                const formData = new FormData();
+                Object.keys(taskData).forEach((key) => {
+                    formData.append(key, taskData[key]);
+                });
+                formData.append("image", imageFile);
+
+                // Panggil service dengan FormData
+                const updatedTask = await updateTasks(editData.id, formData);
+
+                // Update state tasks dengan data yang sudah diupdate
+                setTasks((prevTasks) =>
+                    prevTasks.map((task) =>
+                        task.id === editData.id
+                            ? { ...task, ...updatedTask }
+                            : task
+                    )
+                );
+            } else {
+                // Panggil service dengan JSON data
+                const updatedTask = await updateTasks(editData.id, taskData);
+
+                // Update state tasks dengan data yang sudah diupdate
+                setTasks((prevTasks) =>
+                    prevTasks.map((task) =>
+                        task.id === editData.id
+                            ? { ...task, ...updatedTask }
+                            : task
+                    )
+                );
+            }
+
+            // Update selectedTask jika sedang dipilih
+            if (selectedTask && selectedTask.id === editData.id) {
+                // Refresh data dari server atau update manual
+                const refreshedTasks = await getTasksByUserIdFull(
+                    JSON.parse(localStorage.getItem("userInfo")).id
+                );
+                setTasks(refreshedTasks);
+                const updatedSelectedTask = refreshedTasks.find(
+                    (task) => task.id === editData.id
+                );
+                setSelectedTask(updatedSelectedTask);
+            }
+
+            showAlert("Task berhasil diupdate!", "success");
+            handleClose();
+        } catch (error) {
+            console.error("Error updating task:", error);
+            // Tampilkan error yang lebih detail
+            if (error.response) {
+                showAlert(
+                    `Error ${error.response.status}: ${
+                        error.response.data.message || "Gagal mengupdate task"
+                    }`,
+                    "danger"
+                );
+            } else {
+                showAlert(
+                    "Gagal mengupdate task. Silakan coba lagi.",
+                    "danger"
+                );
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const getPriorityBadge = (priority) => {
+        if (priority === "Hight")
+            return (
+                <Badge bg="danger" className="fw-semibold">
+                    Hight
+                </Badge>
+            );
+        if (priority === "Medium")
+            return (
+                <Badge bg="warning" className="fw-semibold text-dark">
+                    Medium
+                </Badge>
+            );
+        return (
+            <Badge bg="primary" className="fw-semibold">
+                Low
+            </Badge>
+        );
+    };
+
+    const getStatusBadge = (status) => {
+        if (status === "Not Started")
+            return <Badge bg="secondary">Not Started</Badge>;
+        if (status === "Completed")
+            return <Badge bg="success">Completed</Badge>;
+        return (
+            <Badge bg="warning" className="text-dark">
+                In Progress
+            </Badge>
+        );
+    };
+
+    // Header & Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
+
+    const filteredTasks =
+        selectedStatus === "All"
+            ? tasks
+            : tasks.filter((task) => task.status_name === selectedStatus);
+
+    const searchedTasks = debouncedSearchTerm
+        ? filteredTasks.filter((task) =>
+              task.title
+                  .toLowerCase()
+                  .includes(debouncedSearchTerm.toLowerCase())
+          )
+        : filteredTasks;
+
+    /* Header */
+    return (
+        <div className="d-flex flex-column flex-md-row min-vh-100 bg-light">
+            {/* Alert */}
+            {alert.show && (
+                <Alert
+                    variant={alert.type}
+                    className="position-fixed top-0 start-50 translate-middle-x mt-3"
+                    style={{ zIndex: 9999, minWidth: "300px" }}
+                >
+                    {alert.message}
+                </Alert>
+            )}
+
+            <div className="flex-grow-1 p-4">
+                <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <input
+                        type="text"
+                        className="form-control w-100 w-md-50"
+                        placeholder="Search your task here..."
+                        style={{ maxWidth: "400px" }}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div className="d-flex align-items-center gap-3">
+                        <Button
+                            variant="outline-secondary"
+                            className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
+                            style={{ width: 42, height: 42 }}
+                            title="Calendar"
+                        >
+                            <Calendar size={20} />
+                        </Button>
+                        <div className="text-end">
+                            <strong className="d-block">Sunday</strong>
+                            <small className="text-muted">
+                                {new Date().toLocaleDateString()}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Status Filter Buttons */}
+                <div className="d-flex gap-2 mb-4">
+                    {["All", "Not Started", "In Progress", "Completed"].map(
+                        (status) => (
+                            <Button
+                                key={status}
+                                variant={
+                                    selectedStatus === status
+                                        ? "primary"
+                                        : "outline-primary"
+                                }
+                                onClick={() => {
+                                    setSelectedStatus(status);
+                                    setSelectedTask(null);
+                                }}
+                            >
+                                {status}
+                            </Button>
+                        )
+                    )}
+                </div>
+
+                <div className="row g-4">
+                    {/* Task List */}
+                    <div className="col-md-6">
+                        <Card className="shadow-sm border-0">
+                            <Card.Body>
+                                <h5 className="fw-bold mb-4 text-danger">
+                                    My Tasks
+                                </h5>
+
+                                {searchedTasks.map((task) => {
+                                    let bgClass = "bg-light";
+                                    if (task.status_name === "In Progress")
+                                        bgClass = "bg-warning-subtle";
+                                    else if (task.status_name === "Completed")
+                                        bgClass = "bg-success-subtle";
+
+                                    return (
+                                        <div
+                                            key={task.id}
+                                            onClick={() =>
+                                                setSelectedTask(task)
+                                            }
+                                            className={`border p-3 rounded mb-3 ${bgClass} shadow-sm`}
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            <h6 className="mb-1">
+                                                {task.title}
+                                            </h6>
+                                            <p
+                                                className="mb-1 text-muted"
+                                                style={{ fontSize: "0.9rem" }}
+                                            >
+                                                {task.description.slice(0, 70)}
+                                                ...
+                                            </p>
+                                            <div className="d-flex gap-2 flex-wrap align-items-center">
+                                                {getPriorityBadge(
+                                                    task.priority_name
+                                                )}
+                                                {getStatusBadge(
+                                                    task.status_name
+                                                )}
+                                                <small className="text-muted ms-auto">
+                                                    {new Date(
+                                                        task.deadline
+                                                    ).toLocaleDateString()}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </Card.Body>
+                        </Card>
+                    </div>
+
+                    {/* Task Details */}
+                    <div className="col-md-6">
+                        <Card className="shadow-sm border-0">
+                            <Card.Body>
+                                <h5 className="fw-bold text-danger">
+                                    Task Details
+                                </h5>
+
+                                {selectedTask ? (
+                                    <>
+                                        <p className="mb-2">
+                                            <strong>Title:</strong>{" "}
+                                            {selectedTask.title}
+                                        </p>
+                                        <p className="mb-2">
+                                            <strong>Description:</strong>{" "}
+                                            {selectedTask.description}
+                                        </p>
+                                        <p className="mb-2">
+                                            <strong>Priority:</strong>{" "}
+                                            {getPriorityBadge(
+                                                selectedTask.priority_name
+                                            )}
+                                        </p>
+
+                                        <div className="d-flex gap-3 mt-3">
+                                            <Button
+                                                variant="danger"
+                                                title="Delete Task"
+                                                className="d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: 42,
+                                                    height: 42,
+                                                }}
+                                            >
+                                                <Trash size={18} />
+                                            </Button>
+                                            <Button
+                                                variant="warning"
+                                                title="Edit Task"
+                                                className="d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: 42,
+                                                    height: 42,
+                                                }}
+                                                onClick={() =>
+                                                    handleShowModal(
+                                                        selectedTask
+                                                    )
+                                                }
+                                            >
+                                                <Pencil size={18} />
+                                            </Button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <p className="text-muted">
+                                        Pilih salah satu task untuk melihat
+                                        detail.
+                                    </p>
+                                )}
+                            </Card.Body>
+                        </Card>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            {/* Edit Task Modal */}
+            <Modal show={showModal} onHide={handleClose} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        <ImageFill className="me-2" />
+                        Edit Task
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>
+                                Task Title{" "}
+                                <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={editData.title || ""}
+                                onChange={(e) =>
+                                    setEditData({
+                                        ...editData,
+                                        title: e.target.value,
+                                    })
+                                }
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>
+                                Due Date <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={editData.deadline || ""}
+                                onChange={(e) =>
+                                    setEditData({
+                                        ...editData,
+                                        deadline: e.target.value,
+                                    })
+                                }
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Priority</Form.Label>
+                            <div>
+                                <Form.Check
+                                    inline
+                                    label="Low"
+                                    name="priority"
+                                    type="radio"
+                                    id="priority-low"
+                                    checked={editData.priority_id === 1}
+                                    onChange={() =>
+                                        setEditData({
+                                            ...editData,
+                                            priority_id: 1,
+                                        })
+                                    }
+                                />
+                                <Form.Check
+                                    inline
+                                    label="Medium"
+                                    name="priority"
+                                    type="radio"
+                                    id="priority-medium"
+                                    checked={editData.priority_id === 2}
+                                    onChange={() =>
+                                        setEditData({
+                                            ...editData,
+                                            priority_id: 2,
+                                        })
+                                    }
+                                />
+                                <Form.Check
+                                    inline
+                                    label="High"
+                                    name="priority"
+                                    type="radio"
+                                    id="priority-high"
+                                    checked={editData.priority_id === 3}
+                                    onChange={() =>
+                                        setEditData({
+                                            ...editData,
+                                            priority_id: 3,
+                                        })
+                                    }
+                                />
+                            </div>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Status</Form.Label>
+                            <div>
+                                <Form.Check
+                                    inline
+                                    label="Not Started"
+                                    name="status"
+                                    type="radio"
+                                    id="status-notstarted"
+                                    checked={editData.status_id === 1}
+                                    onChange={() =>
+                                        setEditData({
+                                            ...editData,
+                                            status_id: 1,
+                                        })
+                                    }
+                                />
+                                <Form.Check
+                                    inline
+                                    label="In Progress"
+                                    name="status"
+                                    type="radio"
+                                    id="status-inprogress"
+                                    checked={editData.status_id === 2}
+                                    onChange={() =>
+                                        setEditData({
+                                            ...editData,
+                                            status_id: 2,
+                                        })
+                                    }
+                                />
+                                <Form.Check
+                                    inline
+                                    label="Completed"
+                                    name="status"
+                                    type="radio"
+                                    id="status-completed"
+                                    checked={editData.status_id === 3}
+                                    onChange={() =>
+                                        setEditData({
+                                            ...editData,
+                                            status_id: 3,
+                                        })
+                                    }
+                                />
+                            </div>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>
+                                Description{" "}
+                                <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={editData.description || ""}
+                                onChange={(e) =>
+                                    setEditData({
+                                        ...editData,
+                                        description: e.target.value,
+                                    })
+                                }
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Upload Image (optional)</Form.Label>
+                            <Form.Control
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                            />
+                        </Form.Group>
+
+                        {selectedImage && (
+                            <div className="text-center mb-3">
+                                <img
+                                    src={selectedImage}
+                                    alt="Preview"
+                                    className="img-fluid rounded shadow"
+                                    style={{
+                                        maxHeight: "200px",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="secondary"
+                        onClick={handleClose}
+                        disabled={isLoading}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={updateTask}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Updating..." : "Save Task"}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
-
-        <div className="row g-4">
-          {/* Task List */}
-          <div className="col-md-6">
-            <Card className="shadow-sm border-0">
-              <Card.Body>
-                <h5 className="fw-bold mb-4 text-danger">My Tasks</h5>
-
-                <div className="border p-3 rounded mb-3 bg-white shadow-sm">
-                  <h6 className="text-danger">Submit Documents</h6>
-                  <p className="mb-1 text-muted" style={{ fontSize: "0.9rem" }}>
-                    Make sure to submit all the necessary documents...
-                  </p>
-                  <small className="text-muted">
-                    Priority: <span className="text-danger">Extreme</span> | Status: <span className="text-danger">Not Started</span> | Created on: 20/06/2023
-                  </small>
-                </div>
-
-                <div className="border p-3 rounded bg-white shadow-sm">
-                  <h6 className="text-primary">Complete assignments</h6>
-                  <p className="mb-1 text-muted" style={{ fontSize: "0.9rem" }}>
-                    The assignments must be completed to pass final year...
-                  </p>
-                  <small className="text-muted">
-                    Priority: <span className="text-warning">Moderate</span> | Status: <span className="text-primary">In Progress</span> | Created on: 20/06/2023
-                  </small>
-                </div>
-              </Card.Body>
-            </Card>
-          </div>
-
-          {/* Task Details */}
-          <div className="col-md-6">
-            <Card className="shadow-sm border-0">
-              <Card.Body>
-                <h5 className="fw-bold text-danger">Submit Documents</h5>
-                <p className="mb-1 text-muted">Priority: <span className="text-danger">Extreme</span></p>
-                <p className="mb-1 text-muted">Status: <span className="text-danger">Not Started</span></p>
-                <p className="mb-3 text-muted">Created on: 20/06/2023</p>
-
-                <p><strong>Task Title:</strong> Document Submission.</p>
-                <p><strong>Objective:</strong> To submit required documents for something important.</p>
-                <p>
-                  <strong>Task Description:</strong> Review the list of documents required for submission and ensure all necessary documents are ready. Organize the documents accordingly and scan them if physical copies need to be submitted digitally. Rename the scanned files appropriately for easy identification and verify the accepted file formats. Upload the documents securely to the designated platform, double-check for accuracy, and obtain confirmation of successful submission. Follow up if necessary to ensure proper processing.
-                </p>
-
-                <p><strong>Additional Notes:</strong></p>
-                <ul>
-                  <li>Ensure that the documents are authentic and up-to-date.</li>
-                  <li>Maintain confidentiality and security of sensitive information during the submission process.</li>
-                  <li>If there are specific guidelines or deadlines for submission, adhere to them diligently.</li>
-                </ul>
-
-                <p><strong>Deadline for Submission:</strong> End of Day</p>
-
-                <div className="d-flex gap-3 mt-3">
-                  <Button variant="danger" title="Delete Task" className="d-flex align-items-center justify-content-center" style={{ width: 42, height: 42 }}>
-                    <Trash size={18} />
-                  </Button>
-                  <Button variant="warning" title="Edit Task" className="d-flex align-items-center justify-content-center" style={{ width: 42, height: 42 }}>
-                    <Pencil size={18} />
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default MyTaskPage;

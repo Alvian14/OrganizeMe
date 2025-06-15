@@ -30,7 +30,7 @@ export default function Sidebar() {
                         className="rounded-circle"
                         alt="avatar"
                     />
-                    <h5 className="mt-2 mb-0">{userInfo.username}</h5>
+                    <h5 className="mt-2 mb-0">{userInfo.username ?? ""}</h5>
                     <small>{userInfo.email}</small>
                 </div>
 
