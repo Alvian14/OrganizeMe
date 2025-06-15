@@ -20,9 +20,10 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::put('/update-role/{id}', [AuthController::class, 'updateRole']);
 
-
-
 Route::get('/users/{id}/tasks', [TaskController::class, 'getTasksByUserId']);
+Route::get('/users/{id}/myTasks', [TaskController::class, 'getTasksByUserIdFull']);
+Route::post('/tasks/{id}/update', [TaskController::class, 'update']);
+Route::post('/tasks/{id}/delete', action: [TaskController::class, 'destroy']);
 
 
 //api priority
