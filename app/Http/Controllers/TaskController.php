@@ -99,24 +99,20 @@ class TaskController extends Controller
 
     public function update(string $id, Request $request)
     {
-        $task = Task::find($id);
-        if (!$task) {
+        $user = User::find($id);
+
+        if (!$user) {
             return response()->json([
                 "success" => false,
-                "message" => "Resource not found",
+                "message" => "User not found!",
             ], 404);
         }
 
-        //validator
+        // Validasi input
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:100',
-            'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,jpg,png',
-            'deadline' => 'required|date|after:now',
-            'user_id' => 'required|exists:users,id',
-            'category_id' => 'required|exists:categories,id',
-            'status_id' => 'required|exists:task_statuses,id',
-            'priority_id' => 'required|exists:priority_levels,id',
+            'username' => 'required|string|max:50',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'image' => 'nullable|image|mimes:jpg,jpeg,png',
         ]);
 
         if ($validator->fails()) {
@@ -126,38 +122,35 @@ class TaskController extends Controller
             ], 422);
         }
 
-        //data update
+        // Data yang akan diupdate
         $data = [
-            'title' => $request->title,
-            'description' => $request->description,
-            'deadline' => $request->deadline,
-            'user_id' => $request->user_id,
-            'category_id' => $request->category_id,
-            'status_id' => $request->status_id,
-            'priority_id' => $request->priority_id
+            'username' => $request->username,
+            'email' => $request->email,
         ];
 
-        // handle image (upload & delete image)
+        // Jika ada file image yang diupload
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $image->store('tasks', 'public');
+            $image->store('users', 'public');
 
-            if ($task->image) {
-                Storage::disk('public')->delete('tasks/' . $task->image);
+            // Hapus gambar lama jika ada
+            if ($user->image) {
+                Storage::disk('public')->delete('users/' . $user->image);
             }
+
             $data['image'] = $image->hashName();
         }
 
-        $task->update($data);
+        // Update ke database
+        $user->update($data);
 
-        // update data baru ke database
-        $task->update($data);
         return response()->json([
             "success" => true,
-            "message" => "Resource updated successfully!.",
-            "data" => $task
+            "message" => "User updated successfully!",
+            "data" => $user
         ], 200);
     }
+
 
     // diguanakan untuk menghapus data
     public function destroy(string $id)

@@ -26,6 +26,27 @@ export const showUser = async (id) => {
   }
 }
 
+export const updateUser = async (id, userData) => {
+  try {
+    const formData = new FormData();
+    formData.append('_method', 'PUT');  // INI PENTING!
+
+    Object.keys(userData).forEach(key => {
+      if (userData[key] !== null) {
+        formData.append(key, userData[key]);
+      }
+    });
+
+    const response = await API.post(`/users/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return response.data
+  } catch (error) {
+    console.log(error);
+    throw error
+  }
+}
+
 // kode untuk memperbarui data
 export const updateUserRole = async (id, data) => {
   const response = await API.put(`/update-role/${id}`, data);

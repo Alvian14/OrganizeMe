@@ -21,6 +21,7 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::put('/update-role/{id}', [AuthController::class, 'updateRole']);
 
 
+
 Route::get('/users/{id}/tasks', [TaskController::class, 'getTasksByUserId']);
 
 
