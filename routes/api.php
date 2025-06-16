@@ -19,7 +19,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::put('/update-role/{id}', [AuthController::class, 'updateRole']);
-
+Route::post('/update-role/{id}', [AuthController::class, 'updateRole']);
+Route::post('/users/{id}/update-password', [AuthController::class, 'updatePassword']);
 
 
 Route::get('/users/{id}/tasks', [TaskController::class, 'getTasksByUserId']);
