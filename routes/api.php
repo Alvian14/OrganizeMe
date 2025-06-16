@@ -38,6 +38,9 @@ Route::apiResource('/priority', PriorityLevelController::class);
 //api statuses
 Route::apiResource('/statuses', TaskStatusController::class);
 
+//api categories
+Route::get('/categories', [CategoryController::class, 'index']);
+
 //api task
 Route::apiResource('/tasks', TaskController::class);
 

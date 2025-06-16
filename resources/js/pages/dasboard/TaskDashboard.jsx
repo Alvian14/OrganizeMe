@@ -6,6 +6,7 @@ import {
   Form,
   Badge,
   Container,
+  Spinner,
 } from "react-bootstrap";
 import {
   Calendar,
@@ -16,7 +17,8 @@ import {
   ImageFill,
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { insertTask, getTasksByUserId } from "../../_services/tasks";
+import { insertTask, getTasksByUserId, getCategories } from "../../_services/tasks";
+import { API, bookImageStorage } from "../../_api";
 
 const TaskDashboard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -28,6 +30,7 @@ const TaskDashboard = () => {
     priority_id: "",
     status_id: "",
     user_id: "",
+    category_id: "",
     image: null,
   });
   const [loading, setLoading] = useState(false);
@@ -41,6 +44,9 @@ const TaskDashboard = () => {
   const [search, setSearch] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const searchTimeout = useRef(null);
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [categoriesError, setCategoriesError] = useState("");
 
   // Ambil userId dari localStorage
   const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
@@ -56,9 +62,28 @@ const TaskDashboard = () => {
           inProgress: (data || []).filter(t => String(t.status_id) === "2").length,
           completed: (data || []).filter(t => String(t.status_id) === "3").length,
         });
+      }).catch(error => {
+        console.error("Error fetching tasks:", error);
       });
     }
-  }, [showModal, userId]); // refresh setelah modal ditutup (task baru ditambah)
+  }, [showModal, userId]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsLoadingCategories(true);
+      setCategoriesError("");
+      try {
+        const data = await getCategories();
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategoriesError("Failed to load categories. Please try again later.");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Handle search input with debounce
   const handleSearchChange = (e) => {
@@ -113,6 +138,14 @@ const TaskDashboard = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // Validate required fields
+    if (!form.category_id) {
+      setError("Please select a category");
+      setLoading(false);
+      return;
+    }
+
     try {
       // Pastikan semua field dikirim sebagai string (bukan undefined/null)
       const formData = new FormData();
@@ -122,10 +155,12 @@ const TaskDashboard = () => {
       formData.append("priority_id", form.priority_id || "");
       formData.append("status_id", form.status_id || "");
       formData.append("user_id", form.user_id || "");
+      formData.append("category_id", form.category_id || "");
       if (form.image) formData.append("image", form.image);
 
       await insertTask(formData);
 
+      // Reset form and close modal
       setForm({
         title: "",
         description: "",
@@ -133,47 +168,31 @@ const TaskDashboard = () => {
         priority_id: "",
         status_id: "",
         user_id: "",
+        category_id: "",
         image: null,
       });
       setSelectedImage(null);
       setShowModal(false);
     } catch (err) {
-      // Penanganan error lebih detail dan urut sesuai permintaan, fallback jika tidak ada error detail
-      let msg = "Gagal menambah task.";
-      if (err?.response?.data) {
-        if (err.response.data.message) {
-          msg = err.response.data.message;
-        }
-        if (err.response.data.errors) {
-          // Urutkan dan tampilkan error sesuai urutan field, tampilkan semua error jika ada
-          const order = [
-            "title",
-            "description",
-            "deadline",
-            "user_id",
-            "status_id",
-            "priority_id"
-          ];
-          let errorList = order
-            .filter(field => err.response.data.errors[field])
-            .map(field => `${field}: ${err.response.data.errors[field].join(", ")}`)
-            .join(" | ");
-          // Tambahkan error lain yang tidak ada di order
-          const otherErrors = Object.keys(err.response.data.errors)
-            .filter(field => !order.includes(field))
-            .map(field => `${field}: ${err.response.data.errors[field].join(", ")}`)
-            .join(" | ");
-          if (otherErrors) {
-            errorList += (errorList ? " | " : "") + otherErrors;
-          }
-          msg += (errorList ? " " + errorList : "");
-        }
-      } else if (err?.message) {
-        msg += " " + err.message;
+      console.error("Error creating task:", err);
+
+      // Handle validation errors
+      if (err.response?.status === 422) {
+        const errors = err.response.data.errors;
+        const errorMessages = Object.entries(errors)
+          .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+          .join(" | ");
+        setError(errorMessages);
+      } else if (err.response?.status === 404) {
+        setError(err.response.data.message || "Resource not found");
+      } else if (err.response?.status === 401) {
+        setError("Authentication required. Please login again.");
+      } else {
+        setError(err.response?.data?.message || "Failed to create task. Please try again.");
       }
-      setError(msg);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -272,66 +291,53 @@ const TaskDashboard = () => {
                       t.description?.toLowerCase().includes(search.toLowerCase())
                     )
                 )
-                .map((task) => {
-                  // Tentukan warna background card berdasarkan status_id
-                  let cardBg, borderColor, textColor, badgeBg;
-                  if (String(task.status_id) === "1") {
-                    cardBg = "bg-secondary bg-opacity-10";
-                    borderColor = "#6c757d";
-                    textColor = "text-secondary";
-                    badgeBg = "secondary";
-                  } else {
-                    cardBg = "bg-primary bg-opacity-10";
-                    borderColor = "#0d6efd";
-                    textColor = "text-primary";
-                    badgeBg = "primary";
-                  }
-                  return (
-                    <div
-                      key={task.id}
-                      className={`mb-3 p-3 rounded shadow-sm border ${cardBg}`}
-                      style={{
-                        borderWidth: "2px",
-                        borderStyle: "solid",
-                        borderColor: borderColor,
-                      }}
-                    >
-                      <h6 className={`fw-semibold mb-1 ${textColor}`}>
-                        {String(task.status_id) === "1" ? (
-                          <BellFill className="me-2" size={18} />
-                        ) : (
-                          <ClockFill className="me-2" size={18} />
-                        )}
-                        {task.title}
-                      </h6>
-                      <p className="text-secondary small">{task.description}</p>
-                      <Badge
-                        bg={
-                          String(task.priority_id) === "3"
-                            ? "danger"
-                            : String(task.priority_id) === "2"
-                            ? "warning text-dark"
-                            : "secondary"
-                        }
-                        className="me-2"
-                      >
-                        {String(task.priority_id) === "3"
-                          ? "Hight"
-                          : String(task.priority_id) === "2"
-                          ? "Medium"
-                          : "Low"}
-                      </Badge>
-                      <Badge bg={badgeBg}>
-                        {String(task.status_id) === "1"
-                          ? "Not Started"
-                          : "In Progress"}
-                      </Badge>
-                      <small className="d-block text-muted mt-2">
-                        Due: {task.deadline ? task.deadline.split(" ")[0] : ""}
-                      </small>
-                    </div>
-                  );
-                })}
+                .map((task) => (
+                  <div
+                    key={task.id}
+                    className="border rounded-3 p-3 mb-3 bg-white"
+                  >
+                    {task.image && (
+                      <div className="mb-2">
+                        <img
+                          src={`${bookImageStorage}${task.image}`}
+                          alt={task.title}
+                          className="img-fluid rounded"
+                          style={{ maxHeight: "200px", objectFit: "cover", width: "100%" }}
+                        />
+                      </div>
+                    )}
+                    <h6 className="fw-semibold text-primary mb-1">
+                      <BellFill className="me-2" size={18} />
+                      {task.title}
+                    </h6>
+                    <p className="text-secondary small">{task.description}</p>
+                    <Badge bg={
+                      String(task.status_id) === "2"
+                        ? "warning"
+                        : "secondary"
+                    } className="me-2">
+                      {String(task.status_id) === "2"
+                        ? "In Progress"
+                        : "Not Started"}
+                    </Badge>
+                    <Badge bg={
+                      String(task.priority_id) === "3"
+                        ? "danger"
+                        : String(task.priority_id) === "2"
+                        ? "warning text-dark"
+                        : "secondary"
+                    }>
+                      {String(task.priority_id) === "3"
+                        ? "High"
+                        : String(task.priority_id) === "2"
+                        ? "Medium"
+                        : "Low"}
+                    </Badge>
+                    <small className="d-block text-muted mt-2">
+                      Due: {task.deadline ? task.deadline.split(" ")[0] : ""}
+                    </small>
+                  </div>
+                ))}
             </Card.Body>
           </Card>
         </div>
@@ -358,13 +364,18 @@ const TaskDashboard = () => {
                 .map((task) => (
                   <div
                     key={task.id}
-                    className="mb-3 p-3 rounded shadow-sm border bg-success bg-opacity-10"
-                    style={{
-                      borderWidth: "2px",
-                      borderStyle: "solid",
-                      borderColor: "#198754",
-                    }}
+                    className="border rounded-3 p-3 mb-3 bg-white"
                   >
+                    {task.image && (
+                      <div className="mb-2">
+                        <img
+                          src={`${bookImageStorage}${task.image}`}
+                          alt={task.title}
+                          className="img-fluid rounded"
+                          style={{ maxHeight: "200px", objectFit: "cover", width: "100%" }}
+                        />
+                      </div>
+                    )}
                     <h6 className="fw-semibold text-success mb-1">
                       <CheckCircleFill className="me-2" size={18} />
                       {task.title}
@@ -379,7 +390,7 @@ const TaskDashboard = () => {
                         : "secondary"
                     }>
                       {String(task.priority_id) === "3"
-                        ? "Hight"
+                        ? "High"
                         : String(task.priority_id) === "2"
                         ? "Medium"
                         : "Low"}
@@ -504,6 +515,32 @@ const TaskDashboard = () => {
                   onChange={e => setForm(prev => ({ ...prev, status_id: e.target.value }))}
                 />
               </div>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Category</Form.Label>
+              {isLoadingCategories ? (
+                <div className="text-center py-2">
+                  <Spinner animation="border" size="sm" /> Loading categories...
+                </div>
+              ) : categoriesError ? (
+                <div className="text-danger small">{categoriesError}</div>
+              ) : (
+                <Form.Select
+                  name="category_id"
+                  value={form.category_id}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoadingCategories}
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              )}
             </Form.Group>
 
             {/* user_id hidden */}

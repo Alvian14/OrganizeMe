@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\User;
+use App\Models\Category;
 use Dotenv\Util\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Request as FacadesRequest;
@@ -33,8 +34,6 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        
-
         // Validasi input
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:100',
@@ -42,7 +41,7 @@ class TaskController extends Controller
             'image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'deadline' => 'required|date|after:now',
             'user_id' => 'required|exists:users,id',
-
+            'category_id' => 'required|exists:categories,id',
             'status_id' => 'required|exists:task_statuses,id',
             'priority_id' => 'required|exists:priority_levels,id',
         ]);
@@ -63,6 +62,15 @@ class TaskController extends Controller
             ], 404);
         }
 
+        // Cek apakah category ada
+        $category = Category::find($request->category_id);
+        if (!$category) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category not found'
+            ], 404);
+        }
+
         // Proses upload gambar jika ada
         $imageName = null;
         if ($request->hasFile('image')) {
@@ -78,6 +86,7 @@ class TaskController extends Controller
             'image' => $imageName,
             'deadline' => $request->deadline,
             'user_id' => $request->user_id,
+            'category_id' => $request->category_id,
             'status_id' => $request->status_id,
             'priority_id' => $request->priority_id
         ]);
