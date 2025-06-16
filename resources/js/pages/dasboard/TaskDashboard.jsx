@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Card,
   Button,
@@ -16,22 +16,71 @@ import {
   ImageFill,
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { insertTask, getTasksByUserId } from "../../_services/tasks";
 
 const TaskDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    deadline: "",
+    priority_id: "",
+    status_id: "",
+    user_id: "",
+    image: null,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(""); // Tambah state error
+  const [tasks, setTasks] = useState([]);
+  const [overview, setOverview] = useState({
+    notStarted: 0,
+    inProgress: 0,
+    completed: 0,
+  });
+  const [search, setSearch] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const searchTimeout = useRef(null);
 
-  const [formData, setFormData] = useState({
-    title : null,
-    date : null,
-    priority : 1,
-    description : null,
-    image : null,
-    status: 1,
-    category: 1
-  })
+  // Ambil userId dari localStorage
+  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+  const userId = userInfo.id || "";
 
-  const handleShow = () => setShowModal(true);
+  useEffect(() => {
+    if (userId) {
+      getTasksByUserId(userId).then((data) => {
+        setTasks(data || []);
+        // Hitung jumlah berdasarkan status_id
+        setOverview({
+          notStarted: (data || []).filter(t => String(t.status_id) === "1").length,
+          inProgress: (data || []).filter(t => String(t.status_id) === "2").length,
+          completed: (data || []).filter(t => String(t.status_id) === "3").length,
+        });
+      });
+    }
+  }, [showModal, userId]); // refresh setelah modal ditutup (task baru ditambah)
+
+  // Handle search input with debounce
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => {
+      setSearch(value);
+    }, 500);
+  };
+
+  const handleShow = () => {
+    // Ambil userInfo dari localStorage
+    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    setForm((prev) => ({
+      ...prev,
+      user_id: userInfo.id || "",
+    }));
+    setError(""); // Reset error saat modal dibuka
+    setShowModal(true);
+  };
+
   const handleClose = () => {
     setShowModal(false);
     setSelectedImage(null);
@@ -43,51 +92,89 @@ const TaskDashboard = () => {
       setSelectedImage(file);
     }
   };
-
-
-  const handleSubmit =async (e) => {
-    e.preventDefault();
-
-    if (!formData.category || formData.date === null || !formData.title || !formData.description) {
-      return alert( "Please fill all the fields" );
-    } 
-
-
-    const user = JSON.parse(localStorage.getItem("userInfo"));
-    const payload = new FormData();
-    console.log(user.data);
-    payload.append("title", formData.title);
-    payload.append('deadline', formData.date);
-    payload.append('priority_id', formData.priority);
-    payload.append('description', formData.description);
-    payload.append('category_id', formData.category);
-    payload.append('status_id', formData.status);
-    payload.append('user_id', user.id);
-    
-    if (selectedImage) payload.append('image', selectedImage);
-
-    try {
-      
-      const response = await fetch('http://localhost:8000/api/tasks', {
-        method: 'POST',
-        body:payload,
-      });
-
-      if (!response.ok) throw new Error('Submission Failed');
-
-      const data = await response.json();
-      alert("Task Saved", data);
-      handleClose();
-    } catch (error) {
-      console.log(error);
-      alert("Error Saving task");
+  // Handle input form
+  const handleChange = (e) => {
+    const { name, value, type, files } = e.target;
+    if (type === "file") {
+      setForm((prev) => ({ ...prev, image: files[0] }));
+      handleImageChange(e);
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
     }
+  };
 
-    
+  // Handle radio
+  const handlePriorityChange = (e) => {
+    setForm((prev) => ({ ...prev, priority_id: e.target.value }));
+  };
 
+  // Handle submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      // Pastikan semua field dikirim sebagai string (bukan undefined/null)
+      const formData = new FormData();
+      formData.append("title", form.title || "");
+      formData.append("description", form.description || "");
+      formData.append("deadline", form.deadline || "");
+      formData.append("priority_id", form.priority_id || "");
+      formData.append("status_id", form.status_id || "");
+      formData.append("user_id", form.user_id || "");
+      if (form.image) formData.append("image", form.image);
 
-    
-  }
+      await insertTask(formData);
+
+      setForm({
+        title: "",
+        description: "",
+        deadline: "",
+        priority_id: "",
+        status_id: "",
+        user_id: "",
+        image: null,
+      });
+      setSelectedImage(null);
+      setShowModal(false);
+    } catch (err) {
+      // Penanganan error lebih detail dan urut sesuai permintaan, fallback jika tidak ada error detail
+      let msg = "Gagal menambah task.";
+      if (err?.response?.data) {
+        if (err.response.data.message) {
+          msg = err.response.data.message;
+        }
+        if (err.response.data.errors) {
+          // Urutkan dan tampilkan error sesuai urutan field, tampilkan semua error jika ada
+          const order = [
+            "title",
+            "description",
+            "deadline",
+            "user_id",
+            "status_id",
+            "priority_id"
+          ];
+          let errorList = order
+            .filter(field => err.response.data.errors[field])
+            .map(field => `${field}: ${err.response.data.errors[field].join(", ")}`)
+            .join(" | ");
+          // Tambahkan error lain yang tidak ada di order
+          const otherErrors = Object.keys(err.response.data.errors)
+            .filter(field => !order.includes(field))
+            .map(field => `${field}: ${err.response.data.errors[field].join(", ")}`)
+            .join(" | ");
+          if (otherErrors) {
+            errorList += (errorList ? " | " : "") + otherErrors;
+          }
+          msg += (errorList ? " " + errorList : "");
+        }
+      } else if (err?.message) {
+        msg += " " + err.message;
+      }
+      setError(msg);
+    }
+    setLoading(false);
+  };
 
   return (
     <Container fluid className="bg-light p-4" style={{ minHeight: "100vh" }}>
@@ -98,6 +185,8 @@ const TaskDashboard = () => {
           className="form-control shadow-sm"
           placeholder="Search your task here..."
           style={{ maxWidth: "400px" }}
+          value={searchValue}
+          onChange={handleSearchChange}
         />
         <div className="d-flex align-items-center gap-3">
             <Button
@@ -105,6 +194,7 @@ const TaskDashboard = () => {
             className="shadow-sm rounded-circle p-2 d-flex justify-content-center align-items-center"
             style={{ width: 42, height: 42 }}
             title="Calendar"
+            disabled
             >
                 <Calendar size={20} />
             </Button>
@@ -118,41 +208,35 @@ const TaskDashboard = () => {
       {/* Task Overview */}
       <Card className="mb-5 shadow border-0 rounded-4">
         <Card.Body className="text-center">
-          <h4 className="fw-bold text-primary mb-4">
+          <h4 className="fw-bold text-dark mb-4">
             <Calendar className="me-2" />
             Task Overview
           </h4>
           <div className="d-flex justify-content-around flex-wrap gap-4">
-            {[
-              {
-                label: "Not Started",
-                count: 12,
-                color: "danger",
-                icon: <XCircleFill size={48} />,
-              },
-              {
-                label: "In Progress",
-                count: 8,
-                color: "warning",
-                icon: <ClockFill size={48} />,
-              },
-              {
-                label: "Completed",
-                count: 20,
-                color: "success",
-                icon: <CheckCircleFill size={48} />,
-              },
-            ].map(({ label, count, color, icon }) => (
-              <div
-                key={label}
-                className="flex-grow-1 text-center p-3 rounded-4"
-                style={{ backgroundColor: "#f8f9fa", minWidth: "200px" }}
-              >
-                <div className={`text-${color} mb-2`}>{icon}</div>
-                <h2 className={`fw-bold text-${color}`}>{count}</h2>
-                <h6 className="text-muted">{label}</h6>
-              </div>
-            ))}
+            <div
+              className="flex-grow-1 text-center p-3 rounded-4"
+              style={{ backgroundColor: "#f8f9fa", minWidth: "200px" }}
+            >
+              <div className="text-secondary mb-2"><XCircleFill size={48} /></div>
+              <h2 className="fw-bold text-secondary">{overview.notStarted}</h2>
+              <h6 className="text-muted">Not Started</h6>
+            </div>
+            <div
+              className="flex-grow-1 text-center p-3 rounded-4"
+              style={{ backgroundColor: "#f8f9fa", minWidth: "200px" }}
+            >
+              <div className="text-primary mb-2"><ClockFill size={48} /></div>
+              <h2 className="fw-bold text-primary">{overview.inProgress}</h2>
+              <h6 className="text-muted">In Progress</h6>
+            </div>
+            <div
+              className="flex-grow-1 text-center p-3 rounded-4"
+              style={{ backgroundColor: "#f8f9fa", minWidth: "200px" }}
+            >
+              <div className="text-success mb-2"><CheckCircleFill size={48} /></div>
+              <h2 className="fw-bold text-success">{overview.completed}</h2>
+              <h6 className="text-muted">Completed</h6>
+            </div>
           </div>
         </Card.Body>
       </Card>
@@ -178,33 +262,76 @@ const TaskDashboard = () => {
                 </Button>
               </div>
 
-              <div className="mb-3 p-3 rounded bg-white shadow-sm border">
-                <h6 className="fw-semibold text-danger mb-1">
-                  <BellFill className="me-2" size={18} />
-                  Buy groceries
-                </h6>
-                <p className="text-secondary small">
-                  Pick up vegetables, rice, and fruits.
-                </p>
-                <Badge bg="danger" className="me-2">
-                  High
-                </Badge>
-                <Badge bg="secondary">Not Started</Badge>
-                <small className="d-block text-muted mt-2">Due: 09/06/2025</small>
-              </div>
-
-              <div className="p-3 rounded bg-white shadow-sm border">
-                <h6 className="fw-semibold text-warning mb-1">
-                  <ClockFill className="me-2" size={18} />
-                  Frontend Review
-                </h6>
-                <p className="text-secondary small">Review UI/UX with the team.</p>
-                <Badge bg="warning" className="me-2 text-dark">
-                  Medium
-                </Badge>
-                <Badge bg="primary">In Progress</Badge>
-                <small className="d-block text-muted mt-2">Due: 08/06/2025</small>
-              </div>
+              {/* Tampilkan task dengan status_id 1 (Not Started) dan 2 (In Progress) */}
+              {tasks
+                .filter(
+                  (t) =>
+                    (String(t.status_id) === "1" || String(t.status_id) === "2") &&
+                    (
+                      t.title?.toLowerCase().includes(search.toLowerCase()) ||
+                      t.description?.toLowerCase().includes(search.toLowerCase())
+                    )
+                )
+                .map((task) => {
+                  // Tentukan warna background card berdasarkan status_id
+                  let cardBg, borderColor, textColor, badgeBg;
+                  if (String(task.status_id) === "1") {
+                    cardBg = "bg-secondary bg-opacity-10";
+                    borderColor = "#6c757d";
+                    textColor = "text-secondary";
+                    badgeBg = "secondary";
+                  } else {
+                    cardBg = "bg-primary bg-opacity-10";
+                    borderColor = "#0d6efd";
+                    textColor = "text-primary";
+                    badgeBg = "primary";
+                  }
+                  return (
+                    <div
+                      key={task.id}
+                      className={`mb-3 p-3 rounded shadow-sm border ${cardBg}`}
+                      style={{
+                        borderWidth: "2px",
+                        borderStyle: "solid",
+                        borderColor: borderColor,
+                      }}
+                    >
+                      <h6 className={`fw-semibold mb-1 ${textColor}`}>
+                        {String(task.status_id) === "1" ? (
+                          <BellFill className="me-2" size={18} />
+                        ) : (
+                          <ClockFill className="me-2" size={18} />
+                        )}
+                        {task.title}
+                      </h6>
+                      <p className="text-secondary small">{task.description}</p>
+                      <Badge
+                        bg={
+                          String(task.priority_id) === "3"
+                            ? "danger"
+                            : String(task.priority_id) === "2"
+                            ? "warning text-dark"
+                            : "secondary"
+                        }
+                        className="me-2"
+                      >
+                        {String(task.priority_id) === "3"
+                          ? "Hight"
+                          : String(task.priority_id) === "2"
+                          ? "Medium"
+                          : "Low"}
+                      </Badge>
+                      <Badge bg={badgeBg}>
+                        {String(task.status_id) === "1"
+                          ? "Not Started"
+                          : "In Progress"}
+                      </Badge>
+                      <small className="d-block text-muted mt-2">
+                        Due: {task.deadline ? task.deadline.split(" ")[0] : ""}
+                      </small>
+                    </div>
+                  );
+                })}
             </Card.Body>
           </Card>
         </div>
@@ -218,25 +345,50 @@ const TaskDashboard = () => {
                 Completed Tasks
               </h5>
 
-              <div className="mb-3 p-3 rounded bg-white shadow-sm border">
-                <h6 className="fw-semibold text-success mb-1">
-                  <CheckCircleFill className="me-2" size={18} />
-                  Finalize Proposal
-                </h6>
-                <p className="text-secondary small">Submitted to the client.</p>
-                <Badge bg="success">Completed</Badge>
-                <small className="d-block text-muted mt-2">Done: 05/06/2025</small>
-              </div>
-
-              <div className="p-3 rounded bg-white shadow-sm border">
-                <h6 className="fw-semibold text-success mb-1">
-                  <CheckCircleFill className="me-2" size={18} />
-                  Morning Jogging
-                </h6>
-                <p className="text-secondary small">Jogged 5KM in the park.</p>
-                <Badge bg="success">Completed</Badge>
-                <small className="d-block text-muted mt-2">Done: 06/06/2025</small>
-              </div>
+              {/* Tampilkan task dengan status_id 3 */}
+              {tasks
+                .filter(
+                  (t) =>
+                    String(t.status_id) === "3" &&
+                    (
+                      t.title?.toLowerCase().includes(search.toLowerCase()) ||
+                      t.description?.toLowerCase().includes(search.toLowerCase())
+                    )
+                )
+                .map((task) => (
+                  <div
+                    key={task.id}
+                    className="mb-3 p-3 rounded shadow-sm border bg-success bg-opacity-10"
+                    style={{
+                      borderWidth: "2px",
+                      borderStyle: "solid",
+                      borderColor: "#198754",
+                    }}
+                  >
+                    <h6 className="fw-semibold text-success mb-1">
+                      <CheckCircleFill className="me-2" size={18} />
+                      {task.title}
+                    </h6>
+                    <p className="text-secondary small">{task.description}</p>
+                    <Badge bg="success" className="me-2">Completed</Badge>
+                    <Badge bg={
+                      String(task.priority_id) === "3"
+                        ? "danger"
+                        : String(task.priority_id) === "2"
+                        ? "warning text-dark"
+                        : "secondary"
+                    }>
+                      {String(task.priority_id) === "3"
+                        ? "Hight"
+                        : String(task.priority_id) === "2"
+                        ? "Medium"
+                        : "Low"}
+                    </Badge>
+                    <small className="d-block text-muted mt-2">
+                      Due: {task.deadline ? task.deadline.split(" ")[0] : ""}
+                    </small>
+                  </div>
+                ))}
             </Card.Body>
           </Card>
         </div>
@@ -252,105 +404,137 @@ const TaskDashboard = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
+            {/* Tampilkan error jika ada */}
+            {error && (
+              <div className="alert alert-danger" role="alert">
+                {error}
+              </div>
+            )}
             <Form.Group className="mb-3">
               <Form.Label>Task Title</Form.Label>
-              <Form.Control 
-              type="text" 
-              placeholder="Enter task title" 
-              name="title" 
-              value={formData.title}
-              onChange={e => setFormData({...formData, title: e.target.value})}/>
+              <Form.Control
+                type="text"
+                placeholder="Enter task title"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                required
+              />
+
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Due Date</Form.Label>
-              <Form.Control 
-              type="date" 
-              name="date"
-              value={formData.date}
-              onChange={e => setFormData({...formData, date:e.target.value})}/>
+              <Form.Control
+                type="date"
+                name="deadline"
+                value={form.deadline}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Priority</Form.Label>
               <div>
-                <Form.Check 
-                inline 
-                label="Low" 
-                name="priority" 
-                type="radio" 
-                id="low"
-                value={1} 
-                checked={formData.priority === 1} 
-                onChange={e => setFormData({...formData, priority: Number(e.target.value)})}/>                
-                <Form.Check 
-                inline 
-                label="Medium" 
-                name="priority" 
-                type="radio" 
-                id="medium" 
-                value={2}
-                checked={formData.priority === 2} 
-                onChange={e => setFormData({...formData, priority: Number(e.target.value)})}/>
-                <Form.Check 
-                inline 
-                label="High" 
-                name="priority" 
-                type="radio" 
-                id="high"
-                value={3} 
-                checked={formData.priority === 3} 
-                onChange={e => setFormData({...formData, priority: Number(e.target.value)})}/>
+                <Form.Check
+                  inline
+                  label="Low"
+                  name="priority"
+                  type="radio"
+                  id="low"
+                  value="1"
+                  checked={form.priority_id === "1"}
+                  onChange={handlePriorityChange}
+                />
+                <Form.Check
+                  inline
+                  label="Medium"
+                  name="priority"
+                  type="radio"
+                  id="medium"
+                  value="2"
+                  checked={form.priority_id === "2"}
+                  onChange={handlePriorityChange}
+                />
+                <Form.Check
+                  inline
+                  label="High"
+                  name="priority"
+                  type="radio"
+                  id="high"
+                  value="3"
+                  checked={form.priority_id === "3"}
+                  onChange={handlePriorityChange}
+                />
               </div>
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Category</Form.Label>
+              <Form.Label>Status</Form.Label>
               <div>
-                <Form.Check 
-                inline 
-                value={1}
-                label="Daily" 
-                name="category" 
-                type="radio" 
-                id="daily" 
-                checked={formData.category === 1} 
-                onChange={e => setFormData({...formData, category: Number(e.target.value)})}/>                
-                <Form.Check 
-                inline 
-                value={2}
-                label="Weekly" 
-                name="category" 
-                type="radio" 
-                id="weekly" 
-                checked={formData.category === 2} 
-                onChange={e => setFormData({...formData, category: Number(e.target.value)})}/>
-                <Form.Check 
-                inline 
-                value={3}
-                label="Monthly" 
-                name="category" 
-                type="radio" 
-                id="monthly" 
-                checked={formData.category === 3} 
-                onChange={e => setFormData({...formData, category: Number(e.target.value)})}/>
+                <Form.Check
+                  inline
+                  label="Not Started"
+                  name="status"
+                  type="radio"
+                  id="status-notstarted"
+                  value="1"
+                  checked={form.status_id === "1"}
+                  onChange={e => setForm(prev => ({ ...prev, status_id: e.target.value }))}
+                />
+                <Form.Check
+                  inline
+                  label="In Progress"
+                  name="status"
+                  type="radio"
+                  id="status-inprogress"
+                  value="2"
+                  checked={form.status_id === "2"}
+                  onChange={e => setForm(prev => ({ ...prev, status_id: e.target.value }))}
+                />
+                <Form.Check
+                  inline
+                  label="Completed"
+                  name="status"
+                  type="radio"
+                  id="status-completed"
+                  value="3"
+                  checked={form.status_id === "3"}
+                  onChange={e => setForm(prev => ({ ...prev, status_id: e.target.value }))}
+                />
               </div>
             </Form.Group>
+
+            {/* user_id hidden */}
+            <Form.Control
+              type="hidden"
+              name="user_id"
+              value={form.user_id}
+              readOnly
+            />
 
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
-              <Form.Control 
-              as="textarea" 
-              name="description" 
-              rows={3} 
-              placeholder="Write details..." 
-              value={formData.description}
-              onChange={e => setFormData({...formData, description: e.target.value})}/>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Write details..."
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Upload Image (optional)</Form.Label>
-              <Form.Control type="file" accept="image/*" onChange={handleImageChange} />
+              <Form.Control
+                type="file"
+                accept="image/*"
+                name="image"
+                onChange={handleChange}
+              />
             </Form.Group>
 
             {selectedImage && (
@@ -363,14 +547,15 @@ const TaskDashboard = () => {
                 />
               </div>
             )}
-            <div>
-              <Button variant="secondary" onClick={handleClose}>
+
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose} disabled={loading}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" onClick={handleClose}>
-                Save Task
+              <Button variant="primary" type="submit" disabled={loading}>
+                {loading ? "Saving..." : "Save Task"}
               </Button>
-            </div>
+            </Modal.Footer>
           </Form>
         </Modal.Body>
       </Modal>

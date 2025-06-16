@@ -39,7 +39,7 @@ export const updateUser = async (id, userData) => {
 
     const response = await API.post(`/users/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    })  
     return response.data
   } catch (error) {
     console.log(error);
@@ -78,7 +78,6 @@ export const logout = async ({token}) => {
   }
 }
 
-
 export const useDecodeToken = () => {
   const token = localStorage.getItem("accessToken");
   const { decodedToken, isExpired } = useJwt(token);
@@ -105,3 +104,36 @@ export const useDecodeToken = () => {
     data: decodedToken,
   };
 };
+
+
+export const updateUserPassword = async (id, data) => {
+  try {
+    console.log("Sending POST request to:", `/users/${id}/update-password`);
+    console.log("User ID:", id);
+    console.log("Data keys:", Object.keys(data));
+
+    const formData = new FormData();
+    // Tidak perlu _method karena sudah POST
+    formData.append('password', data.password);
+    formData.append('password_confirmation', data.password_confirmation);
+
+    const response = await API.post(`/users/${id}/update-password`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    console.log("Response success:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Gagal update password:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method
+    });
+    throw error;
+  }
+};
+
