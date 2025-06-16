@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Form, Button, Row, Col, Alert } from "react-bootstrap";
-import { updateUser } from "../../_services/auth";
+import { updateUser, updateUserPassword } from "../../_services/auth"; // Import kedua fungsi
 
 export default function AccountInfoPageAdmin() {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
@@ -19,8 +19,7 @@ export default function AccountInfoPageAdmin() {
     // Form data untuk password
     const [passwordData, setPasswordData] = useState({
         password: "",
-        confirmPassword: "",
-        _method: "PUT",
+        password_confirmation: "", // Ubah ke password_confirmation sesuai service
     });
 
     useEffect(() => {
@@ -90,14 +89,14 @@ export default function AccountInfoPageAdmin() {
         }
     };
 
-    // Submit form password
+    // Submit form password - PERBAIKAN DISINI
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setMessage("");
 
         // Validasi password
-        if (passwordData.password !== passwordData.confirmPassword) {
+        if (passwordData.password !== passwordData.password_confirmation) {
             setMessage("Password dan konfirmasi password tidak cocok!");
             setLoading(false);
             return;
@@ -110,20 +109,14 @@ export default function AccountInfoPageAdmin() {
         }
 
         try {
-            const dataToSend = {
-                password: passwordData.password,
-                password_confirmation: passwordData.confirmPassword,
-                _method: "PUT"
-            };
-
-            await updateUser(userInfo.id, dataToSend);
+            // Gunakan fungsi updateUserPassword yang sudah dibuat
+            await updateUserPassword(userInfo.id, passwordData);
             setMessage("Password berhasil diperbarui!");
 
             // Reset form password
             setPasswordData({
                 password: "",
-                confirmPassword: "",
-                _method: "PUT",
+                password_confirmation: "",
             });
 
         } catch (error) {
@@ -153,8 +146,8 @@ export default function AccountInfoPageAdmin() {
                         <Button
                             variant={
                                 activeTab === "profile"
-                                    ? "primary"
-                                    : "outline-primary"
+                                    ? "secondary"
+                                    : "outline-secondary"
                             }
                             onClick={() => {
                                 setActiveTab("profile");
@@ -166,8 +159,8 @@ export default function AccountInfoPageAdmin() {
                         <Button
                             variant={
                                 activeTab === "password"
-                                    ? "primary"
-                                    : "outline-primary"
+                                    ? "secondary"
+                                    : "outline-secondary"
                             }
                             onClick={() => {
                                 setActiveTab("password");
@@ -213,7 +206,7 @@ export default function AccountInfoPageAdmin() {
                                 </Col>
                             </Row>
                             <Button
-                                variant="primary"
+                                variant="secondary"
                                 type="submit"
                                 className="rounded-pill px-4"
                                 disabled={loading}
@@ -244,15 +237,15 @@ export default function AccountInfoPageAdmin() {
                                 </Col>
 
                                 <Col md={6}>
-                                    <Form.Group controlId="confirmPassword">
+                                    <Form.Group controlId="password_confirmation">
                                         <Form.Label>
                                             Konfirmasi Password
                                         </Form.Label>
                                         <Form.Control
                                             type="password"
                                             placeholder="Ulangi password"
-                                            name="confirmPassword"
-                                            value={passwordData.confirmPassword}
+                                            name="password_confirmation"
+                                            value={passwordData.password_confirmation}
                                             onChange={handlePasswordChange}
                                             required
                                             disabled={loading}
@@ -263,7 +256,7 @@ export default function AccountInfoPageAdmin() {
                             </Row>
 
                             <Button
-                                variant="primary"
+                                variant="secondary"
                                 type="submit"
                                 className="rounded-pill px-4"
                                 disabled={loading}

@@ -49,3 +49,17 @@ export const deleteTask = async (id) => {
     throw error;
   }
 };
+
+export const insertTask = async (formData) => {
+  try {
+    const response = await API.post(`/tasks/insert`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("Gagal menambah task:", error);
+    throw error;
+  }
+};

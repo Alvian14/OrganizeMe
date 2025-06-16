@@ -33,19 +33,19 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        //validator
+        
+
+        // Validasi input
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:100',
             'description' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,jpg,png',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'deadline' => 'required|date|after:now',
             'user_id' => 'required|exists:users,id',
-            'category_id' => 'required|exists:categories,id',
             'status_id' => 'required|exists:task_statuses,id',
             'priority_id' => 'required|exists:priority_levels,id',
         ]);
 
-        //cek validator
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -53,22 +53,35 @@ class TaskController extends Controller
             ], 422);
         }
 
-        //upload image
-        $image = $request->file('image');
-        $image->store('tasks', 'public');
+        // Cek apakah user ada
+        $user = User::find($request->user_id);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
 
+        // Proses upload gambar jika ada
+        $imageName = null;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $image->store('tasks', 'public');
+            $imageName = $image->hashName();
+        }
+
+        // Simpan task ke database
         $task = Task::create([
             'title' => $request->title,
             'description' => $request->description,
-            'image' => $image->hashName(),
+            'image' => $imageName,
             'deadline' => $request->deadline,
             'user_id' => $request->user_id,
-            'category_id' => $request->category_id,
             'status_id' => $request->status_id,
             'priority_id' => $request->priority_id
         ]);
 
-        // response
+        // Response sukses
         return response()->json([
             "success" => true,
             "message" => "Resource added successfully!",

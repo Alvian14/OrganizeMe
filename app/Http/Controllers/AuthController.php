@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -83,57 +84,56 @@ class AuthController extends Controller
 
 
     public function update(string $id, Request $request)
-{
-    // mencari data
-    $user = User::find($id);
-    if (!$user) {
-        return response()->json([
-            "success" => false,
-            "message" => "Resource not found",
-        ], 404);
-    }
-
-    // validator
-    $validator = Validator::make($request->all(), [
-        'username' => 'required|string|max:50',
-        'email' => 'required|email|max:255|unique:users,email,' . $id,
-        'image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'message' => $validator->errors()
-        ], 422);
-    }
-
-    // data diupdate
-    $data = [
-        'username' => $request->username,
-        'email' => $request->email,
-    ];
-
-    // handle image (upload & delete image)
-    if ($request->hasFile('image')) {
-        $image = $request->file('image');
-        $image->store('users', 'public');
-
-        if ($user->image) {
-            Storage::disk('public')->delete('users/' . $user->image);
+    {
+        // mencari data
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json([
+                "success" => false,
+                "message" => "Resource not found",
+            ], 404);
         }
 
-        $data['image'] = $image->hashName();
+        // validator
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string|max:50',
+            'email' => 'required|email|max:255|unique:users,email,' . $id,
+            'image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()
+            ], 422);
+        }
+
+        // data diupdate
+        $data = [
+            'username' => $request->username,
+            'email' => $request->email,
+        ];
+
+        // handle image (upload & delete image)
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $image->store('users', 'public');
+
+            if ($user->image) {
+                Storage::disk('public')->delete('users/' . $user->image);
+            }
+
+            $data['image'] = $image->hashName();
+        }
+
+        // update data baru ke database
+        $user->update($data);
+        return response()->json([
+            "success" => true,
+            "message" => "Resource updated successfully!.",
+            "data" => $user
+        ], 200);
     }
-
-    // update data baru ke database
-    $user->update($data);
-    return response()->json([
-        "success" => true,
-        "message" => "Resource updated successfully!.",
-        "data" => $user
-    ], 200);
-}
-
 
 
 
@@ -249,5 +249,57 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json(['message' => 'Password berhasil diubah.']);
+    }
+
+    
+    public function updatePassword(Request $request, $id)
+    {
+        try {
+            // Cari user berdasarkan ID
+            $user = User::findOrFail($id);
+
+            // Validasi password dan konfirmasi
+            $request->validate([
+                'password' => 'required|string|min:6|confirmed',
+            ], [
+                'password.required' => 'Password wajib diisi.',
+                'password.min' => 'Password minimal 6 karakter.',
+                'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            ]);
+
+            // Update password
+            $user->update([
+                'password' => Hash::make($request->password),
+                'updated_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password berhasil diperbarui!',
+                'data' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'updated_at' => $user->updated_at->format('Y-m-d H:i:s'),
+                ]
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User tidak ditemukan.',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui password.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
+            ], 500);
+        }
     }
 }
