@@ -23,6 +23,8 @@ Route::post('/update-role/{id}', [AuthController::class, 'updateRole']);
 Route::post('/users/{id}/update-password', [AuthController::class, 'updatePassword']);
 
 
+Route::post('/tasks', [TaskController::class, 'store']);
+
 Route::get('/users/{id}/tasks', [TaskController::class, 'getTasksByUserId']);
 Route::get('/users/{id}/myTasks', [TaskController::class, 'getTasksByUserIdFull']);
 Route::post('/tasks/{id}/update', [TaskController::class, 'update']);

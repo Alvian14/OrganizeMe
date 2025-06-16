@@ -18,6 +18,7 @@ class TaskSeeder extends Seeder
                 'description' => 'Membuat sistem autentikasi dan otorisasi untuk aplikasi web dengan fitur login, logout, dan middleware authentication.',
                 'image' => 'images/tasks/login-system.jpg',
                 'deadline' => '2025-06-07 10:27:00',
+                'category_id' => 1,
                 'user_id' => 1,
                 'status_id' => 1,
                 'priority_id' => 1,
