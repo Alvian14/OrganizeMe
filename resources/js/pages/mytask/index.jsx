@@ -9,7 +9,12 @@ import {
     Alert,
 } from "react-bootstrap";
 import { Calendar, Trash, Pencil, ImageFill } from "react-bootstrap-icons";
-import { getTasksByUserIdFull, updateTasks, deleteTask } from "../../_services/tasks";
+import {
+    getTasksByUserIdFull,
+    updateTasks,
+    deleteTask,
+} from "../../_services/tasks";
+import { bookImageStorage } from "../../_api";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const MyTaskPage = () => {
@@ -31,7 +36,7 @@ const MyTaskPage = () => {
             if (userInfo?.id) {
                 try {
                     const data = await getTasksByUserIdFull(userInfo.id);
-                    // console.log(data);
+                    console.log(data);
                     setTasks(data);
                 } catch (error) {
                     console.error("Gagal mengambil task:", error);
@@ -164,7 +169,8 @@ const MyTaskPage = () => {
             if (error.response && error.response.status === 422) {
                 setFormErrors(error.response.data.errors || {});
                 showAlert(
-                    error.response.data.message || "Validasi gagal. Periksa input Anda.",
+                    error.response.data.message ||
+                        "Validasi gagal. Periksa input Anda.",
                     "danger"
                 );
             } else if (error.response) {
@@ -260,6 +266,10 @@ const MyTaskPage = () => {
                   .includes(debouncedSearchTerm.toLowerCase())
           )
         : filteredTasks;
+    
+    const hasil = ( foto ) =>{
+        console.log(foto);
+    }
 
     /* Header */
     return (
@@ -404,7 +414,27 @@ const MyTaskPage = () => {
                                                 selectedTask.priority_name
                                             )}
                                         </p>
-
+                                        {/* Tampilkan gambar jika ada */}
+                                        {selectedTask.image && (
+                                            <div className="mb-3">
+                                                <Image
+                                                    src={`${bookImageStorage}/${selectedTask.image}`}
+                                                    alt="Task"
+                                                    fluid
+                                                    rounded
+                                                    style={{
+                                                        maxWidth: "100%",
+                                                        maxHeight: "250px",
+                                                        objectFit: "cover",
+                                                    }}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                            "https://via.placeholder.com/250x150?text=No+Image";
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
                                         <div className="d-flex gap-3 mt-3">
                                             <Button
                                                 variant="danger"
@@ -460,12 +490,16 @@ const MyTaskPage = () => {
                 <Modal.Body>
                     {/* Tampilkan error validasi jika ada */}
                     {Object.keys(formErrors).length > 0 && (
-                        <div className="alert alert-danger py-2 px-3" style={{ fontSize: "0.95rem" }}>
+                        <div
+                            className="alert alert-danger py-2 px-3"
+                            style={{ fontSize: "0.95rem" }}
+                        >
                             <ul className="mb-0">
-                                {Object.entries(formErrors).map(([field, msgs]) =>
-                                    msgs.map((msg, idx) => (
-                                        <li key={field + idx}>{msg}</li>
-                                    ))
+                                {Object.entries(formErrors).map(
+                                    ([field, msgs]) =>
+                                        msgs.map((msg, idx) => (
+                                            <li key={field + idx}>{msg}</li>
+                                        ))
                                 )}
                             </ul>
                         </div>
@@ -664,7 +698,11 @@ const MyTaskPage = () => {
             </Modal>
 
             {/* Modal Konfirmasi Delete */}
-            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+            <Modal
+                show={showDeleteModal}
+                onHide={() => setShowDeleteModal(false)}
+                centered
+            >
                 <Modal.Header closeButton>
                     <Modal.Title>Konfirmasi Hapus</Modal.Title>
                 </Modal.Header>
@@ -672,10 +710,18 @@ const MyTaskPage = () => {
                     Apakah Anda yakin ingin menghapus task ini?
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={isLoading}>
+                    <Button
+                        variant="secondary"
+                        onClick={() => setShowDeleteModal(false)}
+                        disabled={isLoading}
+                    >
                         Batal
                     </Button>
-                    <Button variant="danger" onClick={handleDeleteConfirm} disabled={isLoading}>
+                    <Button
+                        variant="danger"
+                        onClick={handleDeleteConfirm}
+                        disabled={isLoading}
+                    >
                         {isLoading ? "Menghapus..." : "Ya, Hapus"}
                     </Button>
                 </Modal.Footer>

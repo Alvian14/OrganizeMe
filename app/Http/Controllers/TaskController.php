@@ -223,6 +223,7 @@ class TaskController extends Controller
             'tasks.created_at',
             'tasks.priority_id',
             'tasks.status_id',
+            'tasks.image',
             'priority_levels.name as priority_name',
             'task_statuses.name as status_name'
         )
