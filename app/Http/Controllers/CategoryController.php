@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
     public function index() {
-        $categories = Category::with('user')->get();
+        $categories = Category::all();
 
         if ($categories->isEmpty()) {
             return response()->json([

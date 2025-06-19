@@ -63,3 +63,30 @@ export const insertTask = async (formData) => {
     throw error;
   }
 };
+
+export const getCategories = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await API.get('/categories', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || "Failed to fetch categories");
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    if (error.response?.status === 401) {
+      throw new Error("Authentication required. Please login again.");
+    }
+    throw new Error(error.response?.data?.message || "Failed to load categories. Please try again later.");
+  }
+};
