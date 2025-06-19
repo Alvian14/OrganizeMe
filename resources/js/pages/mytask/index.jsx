@@ -266,7 +266,7 @@ const MyTaskPage = () => {
                   .includes(debouncedSearchTerm.toLowerCase())
           )
         : filteredTasks;
-    
+
     const hasil = ( foto ) =>{
         console.log(foto);
     }

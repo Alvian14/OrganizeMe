@@ -122,7 +122,7 @@ const TaskDashboard = () => {
       formData.append("priority_id", form.priority_id || "");
       formData.append("status_id", form.status_id || "");
       formData.append("user_id", form.user_id || "");
-      if (form.image) formData.append("image", form.image);
+      if (form.image) formData.append("image", form.image); // hanya kirim jika ada
 
       await insertTask(formData);
 
@@ -240,7 +240,7 @@ const TaskDashboard = () => {
           </div>
         </Card.Body>
       </Card>
-      
+
 
       {/* Tasks Section */}
       <div className="row g-4">
@@ -534,6 +534,7 @@ const TaskDashboard = () => {
                 accept="image/*"
                 name="image"
                 onChange={handleChange}
+                // required dihapus agar opsional
               />
             </Form.Group>
 

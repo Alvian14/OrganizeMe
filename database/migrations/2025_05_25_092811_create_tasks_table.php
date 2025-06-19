@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->string('image');
+            $table->string('image')->nullable();
             $table->dateTime('deadline');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('status_id')->constrained('task_statuses')->onDelete('cascade');

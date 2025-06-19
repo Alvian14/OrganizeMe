@@ -33,7 +33,6 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        
 
         // Validasi input
         $validator = Validator::make($request->all(), [
@@ -91,7 +90,7 @@ class TaskController extends Controller
 
     public function show(string $id)
     {
-        $task = Task::with('user', 'category', 'status', 'priority')->find($id);
+        $task = Task::with('user', 'status', 'priority')->find($id);
 
         // respone untuk data tidak ditemukan
         if (!$task) {
