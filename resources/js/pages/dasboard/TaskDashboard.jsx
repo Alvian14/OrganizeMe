@@ -80,6 +80,7 @@ const TaskDashboard = () => {
     setError(""); // Reset error saat modal dibuka
     setShowModal(true);
   };
+
   const handleClose = () => {
     setShowModal(false);
     setSelectedImage(null);
@@ -88,10 +89,9 @@ const TaskDashboard = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedImage(URL.createObjectURL(file));
+      setSelectedImage(file);
     }
   };
-
   // Handle input form
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -421,6 +421,7 @@ const TaskDashboard = () => {
                 onChange={handleChange}
                 required
               />
+
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -541,7 +542,7 @@ const TaskDashboard = () => {
             {selectedImage && (
               <div className="text-center mb-3">
                 <img
-                  src={selectedImage}
+                  src={URL.createObjectURL(selectedImage)}
                   alt="Preview"
                   className="img-fluid rounded shadow"
                   style={{ maxHeight: "200px", objectFit: "cover" }}

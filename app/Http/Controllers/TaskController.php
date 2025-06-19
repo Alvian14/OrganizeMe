@@ -14,7 +14,7 @@ class TaskController extends Controller
 {
     public function index()
     {
-        $task = Task::with('user', 'category', 'status', 'priority')->get();
+        $task = Task::with('user', 'status', 'priority')->get();
 
         if ($task->isEmpty()) {
             return response()->json([
@@ -41,6 +41,7 @@ class TaskController extends Controller
             'image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'deadline' => 'required|date|after:now',
             'user_id' => 'required|exists:users,id',
+
             'status_id' => 'required|exists:task_statuses,id',
             'priority_id' => 'required|exists:priority_levels,id',
         ]);
